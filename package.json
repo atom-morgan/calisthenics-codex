@@ -10,7 +10,8 @@
     "typecheck": "next typegen && tsc --noEmit",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "db:seed": "tsx --env-file=.env.local src/db/seed.ts"
   },
   "dependencies": {
     "drizzle-orm": "^0.45.4",

@@ -53,7 +53,7 @@ I'm an experienced front-end engineer (mostly Angular) returning to development 
 - `npm run db:generate`: generate a SQL migration from `src/db/schema.ts` (no DB needed)
 - `npm run db:migrate`: apply migrations (uses `MIGRATION_DATABASE_URL`)
 - `npm run db:studio`: browse the database in Drizzle Studio
-- `npm run db:seed`: seed exercises and demo data (not yet set up)
+- `npm run db:seed`: seed the exercise list (idempotent; demo data comes on Day 4)
 
 Next.js 16 ships its own docs in `node_modules/next/dist/docs/`; see `AGENTS.md`.
 
