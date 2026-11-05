@@ -1,15 +1,8 @@
 @import "tailwindcss";
 
 /*
- * The app is dark-only. Until every legacy `dark:` class is replaced by the
- * tokens below, make the variant always apply so a light system theme can't
- * show light-mode classes on the dark background.
- */
-@custom-variant dark (&);
-
-/*
- * Semantic color tokens. Components use these (bg-surface, text-muted,
- * border-line) instead of palette colors.
+ * Semantic color tokens; the app is dark-only. Components use these
+ * (bg-surface, text-muted, border-line) instead of palette colors.
  */
 :root {
   color-scheme: dark;

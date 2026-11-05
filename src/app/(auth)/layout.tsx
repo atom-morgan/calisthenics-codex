@@ -1,5 +1,8 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
+import { cardClasses } from "@/components/ui/card";
+import { Wordmark } from "@/components/wordmark";
 import { getCurrentUser } from "@/server/auth";
 
 export default async function AuthLayout({
@@ -10,8 +13,11 @@ export default async function AuthLayout({
   if (await getCurrentUser()) redirect("/workouts");
 
   return (
-    <main className="flex min-h-full items-center justify-center p-4">
-      <div className="w-full max-w-sm rounded-xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
+    <main className="flex min-h-full flex-col items-center justify-center gap-6 p-4">
+      <Link href="/">
+        <Wordmark />
+      </Link>
+      <div className={`${cardClasses} w-full max-w-sm p-6 shadow-lift sm:p-8`}>
         {children}
       </div>
     </main>

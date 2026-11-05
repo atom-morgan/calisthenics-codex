@@ -36,7 +36,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-semibold">{copy.title}</h1>
+      <h1 className="text-2xl font-semibold tracking-tight">{copy.title}</h1>
 
       <form action={formAction} className="flex flex-col gap-4" noValidate>
         {mode === "signup" && (
@@ -74,9 +74,12 @@ export function AuthForm({ mode }: { mode: Mode }) {
         </Button>
       </form>
 
-      <p className="text-sm text-zinc-600 dark:text-zinc-400">
+      <p className="text-sm text-muted">
         {copy.switchText}{" "}
-        <Link href={copy.switchLink.href} className="font-medium underline">
+        <Link
+          href={copy.switchLink.href}
+          className="font-medium text-accent-text hover:underline"
+        >
           {copy.switchLink.label}
         </Link>
       </p>
