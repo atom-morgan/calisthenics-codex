@@ -21,10 +21,30 @@ export const setInputSchema = z
     message: "Enter reps or a hold time.",
   });
 
-export const exerciseEntrySchema = z.object({
-  exerciseId: z.uuid("Choose an exercise."),
-  sets: z.array(setInputSchema).min(1, "Add at least one set.").max(50),
-});
+/**
+ * An entry names either an existing exercise (`exerciseId`) or one to create
+ * on save (`newExerciseName`), never both.
+ */
+export const exerciseEntrySchema = z
+  .object({
+    exerciseId: z.uuid("Choose an exercise.").optional(),
+    newExerciseName: z
+      .string()
+      .trim()
+      .transform((name) => name.replace(/\s+/g, " "))
+      .pipe(
+        z
+          .string()
+          .min(1, "Name the new exercise.")
+          .max(80, "Keep the name under 80 characters."),
+      )
+      .optional(),
+    sets: z.array(setInputSchema).min(1, "Add at least one set.").max(50),
+  })
+  .refine(
+    (e) => (e.exerciseId === undefined) !== (e.newExerciseName === undefined),
+    { message: "Choose an exercise.", path: ["exerciseId"] },
+  );
 
 // Tomorrow in UTC: the latest date that's "today" in some timezone.
 function latestAllowedDate() {

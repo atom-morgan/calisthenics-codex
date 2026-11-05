@@ -71,6 +71,44 @@ describe("workoutInputSchema", () => {
     });
   });
 
+  it("accepts a new exercise name instead of an id, normalizing spaces", () => {
+    const parsed = workoutInputSchema.parse(
+      workout({
+        exercises: [
+          { newExerciseName: "  Archer   pull-up ", sets: [{ reps: 3 }] },
+        ],
+      }),
+    );
+    expect(parsed.exercises[0].newExerciseName).toBe("Archer pull-up");
+  });
+
+  it.each([
+    ["neither", { sets: [{ reps: 3 }] }, "Choose an exercise."],
+    [
+      "both",
+      {
+        exerciseId: EXERCISE_ID,
+        newExerciseName: "Archer pull-up",
+        sets: [{ reps: 3 }],
+      },
+      "Choose an exercise.",
+    ],
+  ])("requires exactly one of id or new name: %s", (_label, entry, message) => {
+    expect(issues(workout({ exercises: [entry] }))).toEqual({
+      "exercises.0.exerciseId": message,
+    });
+  });
+
+  it.each([
+    ["blank", "   ", "Name the new exercise."],
+    ["too long", "x".repeat(81), "Keep the name under 80 characters."],
+  ])("rejects a %s new exercise name", (_label, name, message) => {
+    const input = workout({
+      exercises: [{ newExerciseName: name, sets: [{ reps: 3 }] }],
+    });
+    expect(issues(input)).toEqual({ "exercises.0.newExerciseName": message });
+  });
+
   it("requires at least one set per exercise", () => {
     const input = workout({
       exercises: [{ exerciseId: EXERCISE_ID, sets: [] }],
