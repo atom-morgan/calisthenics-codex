@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { useActionState } from "react";
+import { login, signup } from "@/actions/auth";
 import { FormField } from "@/components/form-field";
 import { ErrorAlert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import type { AuthFormState } from "@/lib/validation/auth";
-import { login, signup } from "./actions";
 
 type Mode = "login" | "signup";
 

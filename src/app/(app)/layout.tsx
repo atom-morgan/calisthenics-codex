@@ -1,8 +1,8 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { logout } from "@/actions/auth";
 import { Button } from "@/components/ui/button";
 import { requireUser } from "@/server/auth";
-import { logout } from "../(auth)/actions";
 
 // Pages still call requireUser() themselves: layouts don't re-render on every
 // navigation, so this check alone doesn't guard a page's data.
