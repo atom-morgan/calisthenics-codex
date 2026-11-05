@@ -20,7 +20,7 @@ export default async function WorkoutsPage() {
       </div>
 
       {workouts.length === 0 ? (
-        <div className="flex flex-col items-center gap-4 rounded-xl border border-dashed border-zinc-300 px-6 py-12 text-center dark:border-zinc-700">
+        <div className="flex flex-col items-center gap-4 rounded-xl border border-dashed border-zinc-300 bg-elevated px-6 py-12 text-center dark:border-zinc-700">
           <p className="text-zinc-600 dark:text-zinc-400">No workouts yet.</p>
           <Link href="/workouts/new" className={buttonClasses()}>
             Log your first workout
@@ -31,7 +31,7 @@ export default async function WorkoutsPage() {
           {workouts.map((workout) => (
             <li
               key={workout.id}
-              className="flex flex-col gap-3 rounded-xl border border-zinc-200 p-4 dark:border-zinc-800"
+              className="flex flex-col gap-3 rounded-xl border border-zinc-200 bg-elevated p-4 dark:border-zinc-800"
             >
               <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
                 <h2 className="font-semibold">

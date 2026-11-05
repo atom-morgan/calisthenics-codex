@@ -43,7 +43,7 @@ export function DescribeWorkout({ onParsed }: DescribeWorkoutProps) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex flex-col gap-3 rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900/50"
+      className="flex flex-col gap-3 rounded-xl border border-zinc-200 bg-surface p-4 dark:border-zinc-800"
     >
       <label className="flex flex-col gap-1">
         <span className="text-sm font-medium">Describe your workout</span>

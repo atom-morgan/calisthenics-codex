@@ -9,7 +9,7 @@ export default function Loading() {
       {[0, 1, 2].map((i) => (
         <div
           key={i}
-          className="flex flex-col gap-3 rounded-xl border border-zinc-200 p-4 dark:border-zinc-800"
+          className="flex flex-col gap-3 rounded-xl border border-zinc-200 bg-elevated p-4 dark:border-zinc-800"
         >
           <div className="h-5 w-28 animate-pulse rounded bg-zinc-200 dark:bg-zinc-800" />
           <div className="h-4 w-3/4 animate-pulse rounded bg-zinc-100 dark:bg-zinc-900" />

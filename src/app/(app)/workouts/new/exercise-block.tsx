@@ -32,7 +32,7 @@ export function ExerciseBlock({
   const isNew = exercise.newExerciseName !== null;
 
   return (
-    <fieldset className="flex flex-col gap-3 rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
+    <fieldset className="flex flex-col gap-3 rounded-xl border border-zinc-200 bg-elevated p-4 dark:border-zinc-800">
       <legend className="sr-only">Exercise {index + 1}</legend>
       <div className="flex items-end gap-2">
         <label className="flex flex-1 flex-col gap-1">
