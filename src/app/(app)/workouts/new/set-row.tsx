@@ -2,7 +2,7 @@ import { FieldError } from "@/components/ui/alert";
 import { inputClasses } from "@/components/ui/input";
 import type { SetDraft, SetField } from "./workout-draft";
 
-export const SET_GRID = "grid grid-cols-[2.5rem_1fr_1fr_1fr_2.5rem] gap-2";
+export const SET_GRID = "grid grid-cols-[2.5rem_1fr_1fr_1fr_2.75rem] gap-2";
 
 type SetRowProps = {
   set: SetDraft;
@@ -24,7 +24,9 @@ export function SetRow({
   return (
     <div className="flex flex-col gap-1">
       <div className={`${SET_GRID} items-center`}>
-        <span className="text-sm text-zinc-500">{number}</span>
+        <span className="font-mono text-sm text-muted tabular-nums">
+          {number}
+        </span>
         <input
           type="number"
           inputMode="numeric"
@@ -60,7 +62,7 @@ export function SetRow({
             type="button"
             onClick={onRemove}
             aria-label={`Remove set ${label}`}
-            className="flex size-10 items-center justify-center rounded-md text-zinc-500 hover:bg-red-50 hover:text-red-600 dark:text-zinc-400 dark:hover:bg-red-950 dark:hover:text-red-400"
+            className="flex size-11 items-center justify-center rounded-lg text-muted transition-colors hover:bg-danger-soft hover:text-danger"
           >
             <svg
               viewBox="0 0 24 24"

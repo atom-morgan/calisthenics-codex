@@ -8,7 +8,12 @@ export default async function NewWorkoutPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-semibold">Log a workout</h1>
+      <div className="flex flex-col gap-1">
+        <h1 className="text-3xl font-semibold tracking-tight">Log a workout</h1>
+        <p className="text-sm text-muted">
+          Type it the way you would in a notes app, or fill in the form.
+        </p>
+      </div>
       <WorkoutForm exercises={exercises} />
     </div>
   );

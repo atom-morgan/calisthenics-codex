@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
 import { buttonClasses } from "@/components/ui/button";
+import { cardClasses } from "@/components/ui/card";
 import { formatSets, formatWorkoutDate } from "@/lib/format";
 import { requireUser } from "@/server/auth";
 import { listWorkoutsForUser } from "@/server/workouts";
@@ -10,8 +12,11 @@ export default async function WorkoutsPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between gap-4">
-        <h1 className="text-2xl font-semibold">Workouts</h1>
+      <div className="flex items-end justify-between gap-4">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-3xl font-semibold tracking-tight">Workouts</h1>
+          <p className="text-sm text-muted">Your most recent sessions.</p>
+        </div>
         {workouts.length > 0 && (
           <Link href="/workouts/new" className={buttonClasses()}>
             Log workout
@@ -20,8 +25,15 @@ export default async function WorkoutsPage() {
       </div>
 
       {workouts.length === 0 ? (
-        <div className="flex flex-col items-center gap-4 rounded-xl border border-dashed border-zinc-300 bg-elevated px-6 py-12 text-center dark:border-zinc-700">
-          <p className="text-zinc-600 dark:text-zinc-400">No workouts yet.</p>
+        <div
+          className={`${cardClasses} flex flex-col items-center gap-4 border-dashed px-6 py-14 text-center`}
+        >
+          <div className="flex flex-col gap-1">
+            <p className="font-medium">No workouts yet</p>
+            <p className="text-sm text-muted">
+              Describe a session in plain English, or fill in the form.
+            </p>
+          </div>
           <Link href="/workouts/new" className={buttonClasses()}>
             Log your first workout
           </Link>
@@ -31,37 +43,44 @@ export default async function WorkoutsPage() {
           {workouts.map((workout) => (
             <li
               key={workout.id}
-              className="flex flex-col gap-3 rounded-xl border border-zinc-200 bg-elevated p-4 dark:border-zinc-800"
+              className={`${cardClasses} flex flex-col gap-4 p-5`}
             >
-              <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-                <h2 className="font-semibold">
+              <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+                <h2 className="font-semibold tracking-tight">
                   <time dateTime={workout.performedOn}>
                     {formatWorkoutDate(workout.performedOn)}
                   </time>
                 </h2>
-                {workout.notes && (
-                  <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                    {workout.notes}
-                  </p>
-                )}
+                <Badge>
+                  {workout.exercises.length}{" "}
+                  {workout.exercises.length === 1 ? "exercise" : "exercises"}
+                </Badge>
               </div>
-              <dl className="grid grid-cols-[minmax(7rem,auto)_1fr] gap-x-4 gap-y-1 text-sm">
+              <dl className="flex flex-col divide-y divide-line">
                 {workout.exercises.map((exercise) => (
-                  <div key={exercise.position} className="contents">
-                    <dt className="font-medium">{exercise.name}</dt>
-                    <dd className="text-zinc-700 dark:text-zinc-300">
+                  <div
+                    key={exercise.position}
+                    className="flex items-baseline justify-between gap-4 py-2 first:pt-0 last:pb-0"
+                  >
+                    <dt className="text-sm font-medium">{exercise.name}</dt>
+                    <dd className="text-right font-mono text-sm text-muted tabular-nums">
                       {formatSets(exercise.sets)}
                     </dd>
                   </div>
                 ))}
               </dl>
+              {workout.notes && (
+                <p className="border-l-2 border-accent pl-3 text-sm text-muted">
+                  {workout.notes}
+                </p>
+              )}
             </li>
           ))}
         </ul>
       )}
 
       {workouts.length === 20 && (
-        <p className="text-center text-sm text-zinc-500">
+        <p className="text-center text-sm text-muted">
           Showing your 20 most recent workouts.
         </p>
       )}

@@ -23,12 +23,13 @@
   --accent: #ff9200;
   --accent-fg: #17171a;
   --accent-text: #ff9200;
-  --accent-soft: #ff920024;
+  /* Soft tints are opaque (mixed into --elevated) so the dot grid can't show through. */
+  --accent-soft: color-mix(in srgb, #ff9200 14%, var(--elevated));
   --focus: #4fc8aeb8;
   --danger: #f97066;
-  --danger-soft: #f9706624;
+  --danger-soft: color-mix(in srgb, #f97066 12%, var(--elevated));
   --warning: #ffb44d;
-  --warning-soft: #ff92001f;
+  --warning-soft: color-mix(in srgb, #ffb44d 10%, var(--elevated));
   --dot: #ededed12;
 }
 

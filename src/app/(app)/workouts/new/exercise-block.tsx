@@ -1,6 +1,7 @@
 import type { Dispatch } from "react";
 import { FieldError } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { cardClasses } from "@/components/ui/card";
 import { inputClasses } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import type { ExerciseOption } from "@/server/exercises";
@@ -32,7 +33,7 @@ export function ExerciseBlock({
   const isNew = exercise.newExerciseName !== null;
 
   return (
-    <fieldset className="flex flex-col gap-3 rounded-xl border border-zinc-200 bg-elevated p-4 dark:border-zinc-800">
+    <fieldset className={`${cardClasses} flex flex-col gap-3 p-5`}>
       <legend className="sr-only">Exercise {index + 1}</legend>
       <div className="flex items-end gap-2">
         <label className="flex flex-1 flex-col gap-1">
@@ -95,7 +96,9 @@ export function ExerciseBlock({
         }
       />
 
-      <div className={`${SET_GRID} text-xs font-medium text-zinc-500`}>
+      <div
+        className={`${SET_GRID} text-xs font-medium tracking-wide text-muted uppercase`}
+      >
         <span>Set</span>
         <span>Reps</span>
         <span>Hold (sec)</span>

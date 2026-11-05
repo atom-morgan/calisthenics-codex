@@ -11,15 +11,17 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex min-h-full flex-col">
-      <header className="border-b border-zinc-200 bg-page dark:border-zinc-800">
+      <header className="sticky top-0 z-10 border-b border-line bg-page">
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-4 py-3">
-          <Link href="/workouts" className="font-semibold">
+          <Link
+            href="/workouts"
+            className="flex items-center gap-2 font-semibold tracking-tight"
+          >
+            <span aria-hidden className="size-2.5 rounded-sm bg-accent" />
             Calisthenics Log
           </Link>
           <div className="flex items-center gap-3 text-sm">
-            <span className="text-zinc-600 dark:text-zinc-400">
-              {user.name}
-            </span>
+            <span className="text-muted">{user.name}</span>
             <form action={logout}>
               <Button type="submit" variant="secondary" size="sm">
                 Log out
@@ -28,7 +30,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
           </div>
         </div>
       </header>
-      <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-6">
+      <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-8">
         {children}
       </main>
     </div>

@@ -10,6 +10,7 @@ import {
 } from "react";
 import { ErrorAlert, FieldError } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { cardClasses } from "@/components/ui/card";
 import { inputClasses } from "@/components/ui/input";
 import { useLocalToday } from "@/lib/use-local-today";
 import type { WorkoutFormState } from "@/lib/validation/workout";
@@ -69,7 +70,9 @@ export function WorkoutForm({ exercises }: { exercises: ExerciseOption[] }) {
     <div className="flex flex-col gap-6">
       <DescribeWorkout onParsed={handleParsed} />
       <form onSubmit={handleSubmit} className="flex flex-col gap-6" noValidate>
-        <div className="grid gap-4 sm:grid-cols-[12rem_1fr]">
+        <div
+          className={`${cardClasses} grid gap-4 p-5 sm:grid-cols-[12rem_1fr]`}
+        >
           <label className="flex flex-col gap-1">
             <span className="text-sm font-medium">Date</span>
             <input
@@ -85,8 +88,7 @@ export function WorkoutForm({ exercises }: { exercises: ExerciseOption[] }) {
           </label>
           <label className="flex flex-col gap-1">
             <span className="text-sm font-medium">
-              Notes{" "}
-              <span className="font-normal text-zinc-500">(optional)</span>
+              Notes <span className="font-normal text-muted">(optional)</span>
             </span>
             <input
               value={notes}
@@ -131,7 +133,7 @@ export function WorkoutForm({ exercises }: { exercises: ExerciseOption[] }) {
           </Button>
           <Link
             href="/workouts"
-            className="text-sm text-zinc-600 underline dark:text-zinc-400"
+            className="text-sm text-muted transition-colors hover:text-fg"
           >
             Cancel
           </Link>
