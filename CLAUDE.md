@@ -75,7 +75,7 @@ Write comments for a teammate who knows React, Next.js, and TypeScript, the way 
 - `npm run lint`: lint
 - `npm run format` / `npm run format:check`: format with Prettier / check formatting
 - `npm run typecheck`: generate Next route types (`next typegen`), then `tsc --noEmit`
-- `npm test`: run tests (not yet set up)
+- `npm test` / `npm run test:watch`: run Vitest once / in watch mode (tests live next to their source as `*.test.ts`)
 - `npm run db:generate`: generate a SQL migration from `src/db/schema.ts` (no DB needed)
 - `npm run db:migrate`: apply migrations (uses `MIGRATION_DATABASE_URL`)
 - `npm run db:studio`: browse the database in Drizzle Studio
