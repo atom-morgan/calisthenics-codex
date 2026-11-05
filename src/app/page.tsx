@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { buttonClasses } from "@/components/ui/button";
 import { getCurrentUser } from "@/server/auth";
 
 export default async function Home() {
@@ -14,16 +15,10 @@ export default async function Home() {
         </p>
       </div>
       <div className="flex gap-3">
-        <Link
-          href="/signup"
-          className="rounded-md bg-zinc-900 px-4 py-2 font-medium text-white hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
-        >
+        <Link href="/signup" className={buttonClasses()}>
           Sign up
         </Link>
-        <Link
-          href="/login"
-          className="rounded-md border border-zinc-300 px-4 py-2 font-medium hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-900"
-        >
+        <Link href="/login" className={buttonClasses({ variant: "secondary" })}>
           Log in
         </Link>
       </div>

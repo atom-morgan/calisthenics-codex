@@ -1,10 +1,8 @@
 import Link from "next/link";
+import { buttonClasses } from "@/components/ui/button";
 import { formatSets, formatWorkoutDate } from "@/lib/format";
 import { requireUser } from "@/server/auth";
 import { listWorkoutsForUser } from "@/server/workouts";
-
-const primaryButton =
-  "rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300";
 
 export default async function WorkoutsPage() {
   const user = await requireUser();
@@ -15,7 +13,7 @@ export default async function WorkoutsPage() {
       <div className="flex items-center justify-between gap-4">
         <h1 className="text-2xl font-semibold">Workouts</h1>
         {workouts.length > 0 && (
-          <Link href="/workouts/new" className={primaryButton}>
+          <Link href="/workouts/new" className={buttonClasses()}>
             Log workout
           </Link>
         )}
@@ -24,7 +22,7 @@ export default async function WorkoutsPage() {
       {workouts.length === 0 ? (
         <div className="flex flex-col items-center gap-4 rounded-xl border border-dashed border-zinc-300 px-6 py-12 text-center dark:border-zinc-700">
           <p className="text-zinc-600 dark:text-zinc-400">No workouts yet.</p>
-          <Link href="/workouts/new" className={primaryButton}>
+          <Link href="/workouts/new" className={buttonClasses()}>
             Log your first workout
           </Link>
         </div>

@@ -7,6 +7,9 @@ import {
   useActionState,
   useState,
 } from "react";
+import { ErrorAlert, FieldError } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { inputClasses } from "@/components/ui/input";
 import type { ExerciseOption } from "@/server/exercises";
 import type { WorkoutFormState, WorkoutInput } from "@/lib/validation/workout";
 import { useLocalToday } from "@/lib/use-local-today";
@@ -55,14 +58,6 @@ function toInput(
       })),
     })),
   };
-}
-
-const inputClass =
-  "w-full rounded-md border border-zinc-300 bg-white px-2 py-1.5 text-zinc-900 outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 aria-invalid:border-red-600 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:focus:border-zinc-100 dark:focus:ring-zinc-100";
-
-function FieldError({ message }: { message?: string }) {
-  if (!message) return null;
-  return <p className="text-sm text-red-600 dark:text-red-400">{message}</p>;
 }
 
 export function WorkoutForm({ exercises }: { exercises: ExerciseOption[] }) {
@@ -143,7 +138,7 @@ export function WorkoutForm({ exercises }: { exercises: ExerciseOption[] }) {
             max={today || undefined}
             onChange={(e) => setDate(e.target.value)}
             aria-invalid={Boolean(issues.performedOn)}
-            className={inputClass}
+            className={inputClasses}
             required
           />
           <FieldError message={issues.performedOn} />
@@ -157,7 +152,7 @@ export function WorkoutForm({ exercises }: { exercises: ExerciseOption[] }) {
             onChange={(e) => setNotes(e.target.value)}
             placeholder="Felt strong, short rest"
             aria-invalid={Boolean(issues.notes)}
-            className={inputClass}
+            className={inputClasses}
           />
           <FieldError message={issues.notes} />
         </label>
@@ -182,7 +177,7 @@ export function WorkoutForm({ exercises }: { exercises: ExerciseOption[] }) {
                     updateExercise(exIndex, { exerciseId: e.target.value })
                   }
                   aria-invalid={Boolean(issues[`${exPath}.exerciseId`])}
-                  className={inputClass}
+                  className={inputClasses}
                 >
                   <option value="">Choose…</option>
                   {exercises.map((option) => (
@@ -193,15 +188,15 @@ export function WorkoutForm({ exercises }: { exercises: ExerciseOption[] }) {
                 </select>
               </label>
               {drafts.length > 1 && (
-                <button
-                  type="button"
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() =>
                     setDrafts((prev) => prev.filter((_, i) => i !== exIndex))
                   }
-                  className="rounded-md px-2 py-1.5 text-sm text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-900"
                 >
                   Remove exercise
-                </button>
+                </Button>
               )}
             </div>
             <FieldError message={issues[`${exPath}.exerciseId`]} />
@@ -238,7 +233,7 @@ export function WorkoutForm({ exercises }: { exercises: ExerciseOption[] }) {
                         updateSet(exIndex, setIndex, { reps: e.target.value })
                       }
                       aria-invalid={Boolean(setError)}
-                      className={inputClass}
+                      className={inputClasses}
                     />
                     <input
                       type="number"
@@ -252,7 +247,7 @@ export function WorkoutForm({ exercises }: { exercises: ExerciseOption[] }) {
                         })
                       }
                       aria-invalid={Boolean(setError)}
-                      className={inputClass}
+                      className={inputClasses}
                     />
                     <input
                       type="number"
@@ -266,7 +261,7 @@ export function WorkoutForm({ exercises }: { exercises: ExerciseOption[] }) {
                           addedWeightLb: e.target.value,
                         })
                       }
-                      className={inputClass}
+                      className={inputClasses}
                     />
                     {exercise.sets.length > 1 ? (
                       <button
@@ -286,42 +281,32 @@ export function WorkoutForm({ exercises }: { exercises: ExerciseOption[] }) {
               );
             })}
             <FieldError message={issues[`${exPath}.sets`]} />
-            <button
-              type="button"
+            <Button
+              variant="ghost"
+              size="sm"
+              className="self-start"
               onClick={() => addSet(exIndex)}
-              className="self-start rounded-md px-2 py-1 text-sm font-medium hover:bg-zinc-100 dark:hover:bg-zinc-900"
             >
               + Add set
-            </button>
+            </Button>
           </fieldset>
         );
       })}
 
-      <button
-        type="button"
+      <Button
+        variant="secondary"
+        className="self-start border-dashed"
         onClick={() => setDrafts((prev) => [...prev, emptyExercise()])}
-        className="self-start rounded-md border border-dashed border-zinc-300 px-3 py-2 text-sm font-medium hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-900"
       >
         + Add exercise
-      </button>
+      </Button>
 
-      {state.error && (
-        <p
-          role="alert"
-          className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950 dark:text-red-300"
-        >
-          {state.error}
-        </p>
-      )}
+      {state.error && <ErrorAlert>{state.error}</ErrorAlert>}
 
       <div className="flex items-center gap-3">
-        <button
-          type="submit"
-          disabled={pending || !performedOn}
-          className="rounded-md bg-zinc-900 px-4 py-2 font-medium text-white hover:bg-zinc-700 disabled:opacity-60 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
-        >
+        <Button type="submit" disabled={pending || !performedOn}>
           {pending ? "Saving…" : "Save workout"}
-        </button>
+        </Button>
         <Link
           href="/workouts"
           className="text-sm text-zinc-600 underline dark:text-zinc-400"

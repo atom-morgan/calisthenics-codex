@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useActionState } from "react";
 import { FormField } from "@/components/form-field";
+import { ErrorAlert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import type { AuthFormState } from "@/lib/validation/auth";
 import { login, signup } from "./actions";
 
@@ -65,22 +67,11 @@ export function AuthForm({ mode }: { mode: Mode }) {
           required
         />
 
-        {state.error && (
-          <p
-            role="alert"
-            className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950 dark:text-red-300"
-          >
-            {state.error}
-          </p>
-        )}
+        {state.error && <ErrorAlert>{state.error}</ErrorAlert>}
 
-        <button
-          type="submit"
-          disabled={pending}
-          className="rounded-md bg-zinc-900 px-4 py-2 font-medium text-white hover:bg-zinc-700 disabled:opacity-60 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
-        >
+        <Button type="submit" disabled={pending}>
           {pending ? copy.pending : copy.submit}
-        </button>
+        </Button>
       </form>
 
       <p className="text-sm text-zinc-600 dark:text-zinc-400">

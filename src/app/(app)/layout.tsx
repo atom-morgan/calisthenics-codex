@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { Button } from "@/components/ui/button";
 import { requireUser } from "@/server/auth";
 import { logout } from "../(auth)/actions";
 
@@ -20,12 +21,9 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
               {user.name}
             </span>
             <form action={logout}>
-              <button
-                type="submit"
-                className="rounded-md border border-zinc-300 px-3 py-1 hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-900"
-              >
+              <Button type="submit" variant="secondary" size="sm">
                 Log out
-              </button>
+              </Button>
             </form>
           </div>
         </div>
