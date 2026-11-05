@@ -135,3 +135,15 @@ Bugs, gotchas, and surprises hit while building this, with the cause, the fix, a
 **Fix:** `prepare: false` in [`db/index.ts`](../src/db/index.ts). Migrations use the session pooler (port 5432) instead ([decisions.md](decisions.md#8-two-database-connection-strings)).
 
 **Takeaway:** Connection poolers change what the database supports. Check the pooler's limitations before choosing a driver configuration.
+
+## LLM integration
+
+### 15. Strict structured-output schemas throw away whole responses
+
+**Problem:** The natural move is to give the model the same strict schema the form uses (`reps: int().min(1).max(1000)`), so the output is "guaranteed valid".
+
+**Cause:** The API's structured outputs can't enforce numeric or length constraints, so the SDK removes them from the schema it sends and checks them client-side after the response arrives. `messages.parse` then **throws** on any mismatch: one bad set loses every exercise in the response.
+
+**Fix:** The schema sent to the model only fixes the shape ([`workout-parser/schema.ts`](../src/lib/workout-parser/schema.ts)). [`parse.ts`](../src/lib/workout-parser/parse.ts) then validates each set with the form's own `setInputSchema`, keeps the good ones, and turns the rest into warnings for the preview.
+
+**Takeaway:** Structured output guarantees parseable JSON of the right shape, not correct values. Validate LLM output yourself, at a granularity where one bad value doesn't discard the good ones. Found by reading the SDK source, not the docs.
