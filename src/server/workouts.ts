@@ -12,19 +12,18 @@ export class UnknownExerciseError extends Error {
   }
 }
 
-// Saves a workout and all its sets for `userId`. The caller must pass the id of
-// the logged-in user (from requireUser()), never an id from request input.
-// `input` must already be validated with workoutInputSchema.
-//
-// Runs in one transaction: either the workout and every set are saved, or
-// nothing is.
+/**
+ * Saves a workout and its sets in one transaction.
+ *
+ * `userId` must come from requireUser(), never from request input.
+ * `input` must already be validated with workoutInputSchema.
+ */
 export async function createWorkout(
   userId: string,
   input: WorkoutInput,
 ): Promise<{ id: string }> {
   return db.transaction(async (tx) => {
-    // Check exercise ids up front for a clear error, instead of relying on the
-    // foreign key to fail halfway through the insert.
+    // Checked up front for a clear error rather than a mid-insert FK failure.
     const exerciseIds = [...new Set(input.exercises.map((e) => e.exerciseId))];
     const found = await tx
       .select({ id: exercises.id })
@@ -41,10 +40,8 @@ export async function createWorkout(
       })
       .returning({ id: workouts.id });
 
-    // Ordering is assigned here from array order, never taken from the client:
-    // - exercise_position: which block (1 = first exercise logged).
-    // - set_number: counts per exercise, so if the same exercise appears in
-    //   two blocks, numbering continues (1, 2, 3, then 4, 5).
+    // Ordering is derived from array order, never accepted from the client.
+    // set_number counts per exercise, so a repeated exercise continues 4, 5...
     const nextSetNumber = new Map<string, number>();
     const rows = input.exercises.flatMap((entry, entryIndex) =>
       entry.sets.map((set) => {
@@ -69,7 +66,7 @@ export async function createWorkout(
 
 export type WorkoutSummary = {
   id: string;
-  performedOn: string; // "YYYY-MM-DD"
+  performedOn: string; // YYYY-MM-DD
   notes: string | null;
   exercises: {
     position: number;
@@ -83,12 +80,12 @@ export type WorkoutSummary = {
   }[];
 };
 
-// The latest workouts for `userId`, newest first, each with its exercises in
-// the order they were logged. As with createWorkout, `userId` must come from
-// requireUser(), never from request input: this filter IS the access rule.
-//
-// Two queries instead of one per workout (the "N+1" problem): first the
-// workouts, then every set for those workouts in one go, grouped in memory.
+/**
+ * The user's most recent workouts, newest first, with exercises in logged
+ * order.
+ *
+ * `userId` must come from requireUser(): this filter is the access rule.
+ */
 export async function listWorkoutsForUser(
   userId: string,
   { limit = 20 }: { limit?: number } = {},
@@ -101,7 +98,6 @@ export async function listWorkoutsForUser(
     })
     .from(workouts)
     .where(eq(workouts.userId, userId))
-    // createdAt breaks ties when two workouts share a date.
     .orderBy(desc(workouts.performedOn), desc(workouts.createdAt))
     .limit(limit);
 
@@ -127,8 +123,7 @@ export async function listWorkoutsForUser(
     )
     .orderBy(asc(sets.exercisePosition), asc(sets.setNumber));
 
-  // Rows arrive sorted by position then set number, so pushing in order keeps
-  // both the exercise order and the set order.
+  // Rows are sorted by position, then set number, so appending preserves order.
   const byWorkout = new Map<string, WorkoutSummary["exercises"]>();
   for (const { workoutId, position, name, ...set } of setRows) {
     const blocks = byWorkout.get(workoutId) ?? [];

@@ -1,5 +1,3 @@
-// Shown automatically by Next while page.tsx is loading its data (Next wraps
-// the page in a <Suspense> boundary with this as the fallback).
 export default function Loading() {
   return (
     <div

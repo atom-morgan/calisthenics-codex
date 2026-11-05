@@ -12,8 +12,7 @@ import type { WorkoutFormState, WorkoutInput } from "@/lib/validation/workout";
 import { useLocalToday } from "@/lib/use-local-today";
 import { createWorkoutAction } from "../actions";
 
-// Draft state holds raw strings (what the inputs show). It's converted to
-// numbers only on submit, and the server validates the result with Zod.
+// Drafts hold raw input strings; they're converted to numbers on submit.
 type SetDraft = {
   key: string;
   reps: string;
@@ -22,7 +21,6 @@ type SetDraft = {
 };
 type ExerciseDraft = { key: string; exerciseId: string; sets: SetDraft[] };
 
-// Keys let React track rows when one is removed from the middle of a list.
 const newKey = () => crypto.randomUUID();
 const emptySet = (): SetDraft => ({
   key: newKey(),
@@ -36,8 +34,7 @@ const emptyExercise = (): ExerciseDraft => ({
   sets: [emptySet()],
 });
 
-// "" -> undefined (field left blank); anything else -> a number. Something
-// like "abc" becomes NaN, which Zod rejects with a message.
+// Blank -> undefined. Invalid input becomes NaN, which Zod rejects.
 const toNumber = (value: string) =>
   value.trim() === "" ? undefined : Number(value);
 
@@ -70,7 +67,7 @@ function FieldError({ message }: { message?: string }) {
 
 export function WorkoutForm({ exercises }: { exercises: ExerciseOption[] }) {
   const today = useLocalToday();
-  // null = "user hasn't touched the date", so it shows today once known.
+  // null until the user picks a date, so it can default to today.
   const [date, setDate] = useState<string | null>(null);
   const [notes, setNotes] = useState("");
   const [drafts, setDrafts] = useState<ExerciseDraft[]>(() => [
@@ -83,7 +80,6 @@ export function WorkoutForm({ exercises }: { exercises: ExerciseOption[] }) {
   const issues = state.issues ?? {};
   const performedOn = date ?? today;
 
-  // Small immutable-update helpers, so the JSX below stays readable.
   function updateExercise(index: number, change: Partial<ExerciseDraft>) {
     setDrafts((prev) =>
       prev.map((e, i) => (i === index ? { ...e, ...change } : e)),
@@ -111,7 +107,7 @@ export function WorkoutForm({ exercises }: { exercises: ExerciseOption[] }) {
     setDrafts((prev) =>
       prev.map((e, i) => {
         if (i !== exIndex) return e;
-        // Copy the previous set's numbers: most people repeat them.
+        // New sets copy the previous one; most people repeat their numbers.
         const last = e.sets[e.sets.length - 1];
         return {
           ...e,
@@ -131,8 +127,7 @@ export function WorkoutForm({ exercises }: { exercises: ExerciseOption[] }) {
   }
 
   function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
-    // preventDefault + startTransition instead of <form action>: we send a
-    // typed object, not FormData, and React won't auto-reset our inputs.
+    // Not <form action>: we send a typed object, and want no automatic reset.
     event.preventDefault();
     startTransition(() => formAction(toInput(performedOn, notes, drafts)));
   }
@@ -220,8 +215,7 @@ export function WorkoutForm({ exercises }: { exercises: ExerciseOption[] }) {
             </div>
             {exercise.sets.map((set, setIndex) => {
               const setPath = `${exPath}.sets.${setIndex}`;
-              // A "reps or hold" error sits on the set itself; type errors sit
-              // on a specific field like ".reps".
+              // Refinement errors sit on the set; type errors on a field.
               const setError =
                 issues[setPath] ??
                 issues[`${setPath}.reps`] ??

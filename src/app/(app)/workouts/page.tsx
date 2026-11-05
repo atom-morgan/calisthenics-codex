@@ -6,8 +6,6 @@ import { listWorkoutsForUser } from "@/server/workouts";
 const primaryButton =
   "rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300";
 
-// Server Component: queries the database directly while rendering. While it
-// loads, Next shows loading.tsx; if it throws, Next shows error.tsx.
 export default async function WorkoutsPage() {
   const user = await requireUser();
   const workouts = await listWorkoutsForUser(user.id);

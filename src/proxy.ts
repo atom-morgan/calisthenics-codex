@@ -2,12 +2,8 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { supabaseEnv } from "@/lib/supabase/env";
 
-// Proxy (called Middleware before Next 16) runs before every matched request.
-// It does two things:
-//   1. Refreshes the Supabase session so the cookie doesn't expire mid-visit.
-//   2. Optimistically redirects logged-out users away from protected pages.
-// It is NOT the security boundary; every page and action still checks the
-// user via src/server/auth.ts.
+// Refreshes the Supabase session and redirects signed-out users to /login.
+// This is an optimistic check only; authorization happens in src/server/auth.ts.
 
 const PUBLIC_PATHS = ["/", "/login", "/signup"];
 
@@ -23,8 +19,7 @@ export async function proxy(request: NextRequest) {
           return request.cookies.getAll();
         },
         setAll(cookiesToSet, headers) {
-          // Write refreshed cookies to the request (so this render sees them)
-          // and to the response (so the browser stores them).
+          // Set on the request too, so this render sees the refreshed session.
           cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value),
           );
@@ -32,8 +27,7 @@ export async function proxy(request: NextRequest) {
           cookiesToSet.forEach(({ name, value, options }) =>
             response.cookies.set(name, value, options),
           );
-          // Cache-Control headers from Supabase so a CDN never caches a
-          // response that carries someone's session cookie.
+          // Supabase's Cache-Control headers keep CDNs from caching auth cookies.
           Object.entries(headers).forEach(([key, value]) =>
             response.headers.set(key, value),
           );
@@ -42,7 +36,6 @@ export async function proxy(request: NextRequest) {
     },
   );
 
-  // Verifies the session token's signature and refreshes it if needed.
   const { data } = await supabase.auth.getClaims();
   const isLoggedIn = Boolean(data?.claims);
 
@@ -57,7 +50,6 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Skip static assets and image optimization; run on everything else.
   matcher: [
     "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
   ],

@@ -1,10 +1,9 @@
-// Pure display helpers (no React, no DB), so they're trivial to unit test.
-
-// "2026-11-04" -> "Wed, Nov 4" (adds the year when it isn't `currentYear`).
-//
-// performed_on is a calendar day with no time or timezone. `new Date("2026-11-04")`
-// would mean midnight UTC, which shows as Nov 3 in US timezones. So build the
-// date in UTC and format it in UTC: the day never shifts.
+/**
+ * "2026-11-04" -> "Wed, Nov 4" (with the year if it isn't `currentYear`).
+ *
+ * Formats in UTC because the input is a calendar day: `new Date("2026-11-04")`
+ * is midnight UTC, which would render as Nov 3 in US timezones.
+ */
 export function formatWorkoutDate(
   isoDate: string,
   currentYear = new Date().getFullYear(),
@@ -26,7 +25,7 @@ type SetValues = {
   addedWeightLb: number | null;
 };
 
-// One set as short text: "8", "20s", "5 × 10s", "6 +10 lb".
+/** "8", "20s", "5 × 10s", "6 +10 lb" */
 export function formatSet({
   reps,
   durationSec,
@@ -41,9 +40,7 @@ export function formatSet({
   return parts.join(" ");
 }
 
-// All sets of one exercise: "8 · 8 · 6". If every set has the same added
-// weight, it's shown once at the end ("8 · 8 · 8 (+10 lb)") instead of on
-// each set.
+/** "8 · 8 · 6"; a weight shared by every set is shown once: "8 · 8 (+10 lb)". */
 export function formatSets(sets: SetValues[]): string {
   const weight = sets[0]?.addedWeightLb ?? null;
   const sameWeight =

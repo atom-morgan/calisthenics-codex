@@ -1,6 +1,4 @@
-// Seeds the shared exercise list. Safe to run repeatedly: existing names are
-// skipped by the case-insensitive unique index on exercises.
-// Run with `npm run db:seed` (loads .env.local via Node's --env-file).
+// Idempotent: names that already exist are skipped via the lower(name) index.
 import { db } from "./index";
 import { exercises } from "./schema";
 
@@ -38,8 +36,6 @@ async function main() {
   const inserted = await db
     .insert(exercises)
     .values(SEED_EXERCISES.map((name) => ({ name })))
-    // No target: skip any row that hits a unique constraint, which here is
-    // only lower(name). createdBy stays null, marking these as seeded.
     .onConflictDoNothing()
     .returning({ name: exercises.name });
 
@@ -54,5 +50,4 @@ main()
     console.error(err);
     process.exitCode = 1;
   })
-  // Close the pool so the script exits instead of hanging on open connections.
   .finally(() => db.$client.end());

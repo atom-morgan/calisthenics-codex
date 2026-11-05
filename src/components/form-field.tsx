@@ -6,8 +6,6 @@ type FormFieldProps = InputHTMLAttributes<HTMLInputElement> & {
   errors?: string[];
 };
 
-// A labeled input with its validation errors. Errors are linked to the input
-// via aria-describedby so screen readers announce them.
 export function FormField({
   label,
   name,

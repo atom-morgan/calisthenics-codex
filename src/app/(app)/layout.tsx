@@ -3,10 +3,8 @@ import type { ReactNode } from "react";
 import { requireUser } from "@/server/auth";
 import { logout } from "../(auth)/actions";
 
-// Layout for every logged-in page. requireUser() redirects to /login if there's
-// no valid session. Pages inside still call requireUser() themselves before
-// loading data: layouts don't re-run on every client-side navigation, so a
-// layout check alone isn't a reliable guard for a page's data.
+// Pages still call requireUser() themselves: layouts don't re-render on every
+// navigation, so this check alone doesn't guard a page's data.
 export default async function AppLayout({ children }: { children: ReactNode }) {
   const user = await requireUser();
 
@@ -21,8 +19,6 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
             <span className="text-zinc-600 dark:text-zinc-400">
               {user.name}
             </span>
-            {/* A plain form posting to a Server Action: logout works even
-                before JavaScript loads. */}
             <form action={logout}>
               <button
                 type="submit"

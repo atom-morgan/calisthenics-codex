@@ -2,8 +2,6 @@ import { z } from "zod";
 
 export const loginSchema = z.object({
   email: z.email("Enter a valid email address.").trim().toLowerCase(),
-  // No length rule on login: just check something was typed. Password rules
-  // belong to signup; enforcing them here would only leak policy details.
   password: z.string().min(1, "Enter your password."),
 });
 
@@ -20,8 +18,7 @@ export const signupSchema = z.object({
     .max(72, "Use at most 72 characters."), // bcrypt's input limit
 });
 
-// What a Server Action sends back to its form. `values` lets the form refill
-// fields after a failed submit (React resets uncontrolled forms on submit).
+// `values` refills fields after a failed submit, since React resets the form.
 export type AuthFormState = {
   error?: string;
   fieldErrors?: Partial<Record<"name" | "email" | "password", string[]>>;

@@ -9,9 +9,6 @@ import {
   signupSchema,
 } from "@/lib/validation/auth";
 
-// Server Actions are public endpoints: anyone can POST to them, so every input
-// is validated here even though the form also has HTML validation.
-
 function text(formData: FormData, key: string) {
   const value = formData.get(key);
   return typeof value === "string" ? value : "";
@@ -36,15 +33,13 @@ export async function login(
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword(parsed.data);
   if (error) {
-    // Same message for "no such user" and "wrong password", so the form can't
-    // be used to discover which emails have accounts.
+    // One message for unknown email and wrong password, to avoid account enumeration.
     return {
       error: "Incorrect email or password.",
       values: { email: raw.email },
     };
   }
 
-  // redirect() works by throwing, so it must stay outside any try/catch.
   redirect("/workouts");
 }
 
@@ -68,7 +63,7 @@ export async function signup(
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
-    // Stored on auth.users; the DB trigger copies it into public.users.name.
+    // Copied into public.users.name by the on_auth_user_created trigger.
     options: { data: { name } },
   });
 
@@ -83,8 +78,7 @@ export async function signup(
     return { error: "Couldn't create your account. Please try again.", values };
   }
 
-  // With email confirmation off (our setting), signUp also logs the user in.
-  // If it's ever turned back on, there's no session until they click the link.
+  // Only reachable if email confirmation is enabled in Supabase.
   if (!data.session) {
     return { error: "Check your email to confirm your account, then log in." };
   }

@@ -6,10 +6,6 @@ import { FormField } from "@/components/form-field";
 import type { AuthFormState } from "@/lib/validation/auth";
 import { login, signup } from "./actions";
 
-// One client component for both forms: they differ only in the name field,
-// the action, and the copy. A Client Component is needed for useActionState
-// (pending state + server-returned errors); the pages around it stay Server
-// Components.
 type Mode = "login" | "signup";
 
 const COPY = {

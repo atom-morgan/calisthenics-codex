@@ -2,8 +2,6 @@ import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 import { getCurrentUser } from "@/server/auth";
 
-// Shared layout for /login and /signup (the "(auth)" folder doesn't appear in
-// the URL). Logged-in users have no reason to be here, so send them on.
 export default async function AuthLayout({
   children,
 }: {

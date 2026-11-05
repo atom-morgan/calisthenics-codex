@@ -4,9 +4,7 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { supabaseEnv } from "./env";
 
-// A Supabase client for Server Components and Server Actions, reading and
-// writing the session through Next's cookie store. Create one per request;
-// never share it between requests (it holds that user's session).
+// Per-request client: it carries the current user's session.
 export async function createClient() {
   const cookieStore = await cookies();
 
@@ -24,9 +22,8 @@ export async function createClient() {
               cookieStore.set(name, value, options),
             );
           } catch {
-            // Server Components can't set cookies (only Server Actions and
-            // Route Handlers can). Safe to ignore: proxy.ts refreshes the
-            // session cookie on every request before the page renders.
+            // Server Components can't set cookies. Safe to ignore: proxy.ts
+            // refreshes the session before rendering.
           }
         },
       },

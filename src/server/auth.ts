@@ -12,17 +12,10 @@ export type CurrentUser = Pick<
   "id" | "email" | "name" | "role"
 >;
 
-// The single source of truth for "who is making this request?". Every
-// protected page, Server Action, and data function goes through here (or
-// requireUser below). The user id comes from a verified token, never from
-// request input.
-//
-// React's cache() dedupes calls within one server render, so a layout and a
-// page can both call this without two auth checks and two DB queries.
+/** The signed-in user, or null. Memoized for the duration of a render. */
 export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
   const supabase = await createClient();
-  // getClaims() verifies the token's signature. (getSession() would not; it
-  // trusts whatever is in the cookie.)
+  // getClaims() verifies the JWT signature; getSession() would trust the cookie.
   const { data, error } = await supabase.auth.getClaims();
   const userId = data?.claims.sub;
   if (error || !userId) return null;
@@ -38,12 +31,11 @@ export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
     .where(eq(users.id, userId))
     .limit(1);
 
-  // A valid login with no profile row shouldn't happen (a DB trigger creates
-  // the row at signup). Treat it as logged out rather than half-logged-in.
+  // No profile row (shouldn't happen given the trigger) is treated as signed out.
   return user ?? null;
 });
 
-// For pages and actions that must have a user: redirects to /login if not.
+/** The signed-in user; redirects to /login if there isn't one. */
 export async function requireUser(): Promise<CurrentUser> {
   const user = await getCurrentUser();
   if (!user) redirect("/login");

@@ -13,23 +13,18 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
-// Supabase's built-in auth.users table. Drizzle only references it for the
-// foreign key below; it never creates or migrates it (see schemaFilter in
-// drizzle.config.ts).
 import { authUsers } from "drizzle-orm/supabase";
 
-// Every table calls .enableRLS() with no policies. Supabase auto-exposes the
-// public schema over a REST API reachable with the (public) anon key; RLS with
-// no policies blocks all of that. Our server connects as the `postgres` role,
-// which bypasses RLS, and enforces authorization in TypeScript instead.
+// Every table enables RLS with no policies, which blocks Supabase's
+// auto-generated REST API. The app connects as `postgres` (bypasses RLS) and
+// enforces authorization in src/server. See docs/decisions.md.
 
 export const roleEnum = pgEnum("role", ["athlete", "coach"]);
 
 const createdAt = () =>
   timestamp("created_at", { withTimezone: true }).notNull().defaultNow();
 
-// Our profile table. `id` is the same UUID as the Supabase auth user, so a
-// session's user id can be used directly in queries.
+// Profile row per auth user; created by the on_auth_user_created trigger.
 export const users = pgTable("users", {
   id: uuid("id")
     .primaryKey()
@@ -40,9 +35,8 @@ export const users = pgTable("users", {
   createdAt: createdAt(),
 }).enableRLS();
 
-// Link table: one coach has many athletes. "coach_id is a coach" and
-// "athlete_id is an athlete" are enforced in application code (Day 3), since
-// a CHECK constraint can't look at other rows.
+// Roles of both sides are enforced in application code: a CHECK constraint
+// can't look at other rows.
 export const coachAthletes = pgTable(
   "coach_athletes",
   {
@@ -56,7 +50,7 @@ export const coachAthletes = pgTable(
   },
   (t) => [
     primaryKey({ columns: [t.coachId, t.athleteId] }),
-    // The PK index covers lookups by coach; this one covers "who coaches me?".
+    // The primary key covers lookups by coach; this covers lookups by athlete.
     index("coach_athletes_athlete_id_idx").on(t.athleteId),
   ],
 ).enableRLS();
@@ -66,14 +60,12 @@ export const exercises = pgTable(
   {
     id: uuid("id").primaryKey().defaultRandom(),
     name: text("name").notNull(),
-    // Null for seeded exercises. If the creator is deleted, keep the exercise
-    // (other users' sets may reference it) and just drop the attribution.
+    // Null for seeded exercises. `set null`: other users' sets may use it.
     createdBy: uuid("created_by").references(() => users.id, {
       onDelete: "set null",
     }),
     createdAt: createdAt(),
   },
-  // Case-insensitive uniqueness: "Pull-up" and "pull-up" are the same exercise.
   (t) => [uniqueIndex("exercises_name_lower_idx").on(sql`lower(${t.name})`)],
 ).enableRLS();
 
@@ -84,12 +76,10 @@ export const workouts = pgTable(
     userId: uuid("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
-    // "YYYY-MM-DD" string in TypeScript: a calendar day, no timezone.
     performedOn: date("performed_on").notNull(),
     notes: text("notes"),
     createdAt: createdAt(),
   },
-  // History views: "this user's workouts, newest first".
   (t) => [
     index("workouts_user_id_performed_on_idx").on(
       t.userId,
@@ -105,19 +95,15 @@ export const sets = pgTable(
     workoutId: uuid("workout_id")
       .notNull()
       .references(() => workouts.id, { onDelete: "cascade" }),
-    // No cascade: an exercise that has logged sets can't be deleted.
     exerciseId: uuid("exercise_id")
       .notNull()
       .references(() => exercises.id),
-    // Which block of the workout this set belongs to (1 = first exercise
-    // logged). Keeps the order the athlete did things in; set_number orders
-    // sets within the block's exercise.
+    // 1-based order of the exercise within the workout, as logged.
     exercisePosition: integer("exercise_position").notNull(),
     setNumber: integer("set_number").notNull(),
     reps: integer("reps"),
     durationSec: integer("duration_sec"),
-    // mode "number" returns a JS number instead of Postgres numeric's
-    // default string representation. Fine for body-weight-scale values.
+    // Drizzle returns numeric as a string by default.
     addedWeightLb: numeric("added_weight_lb", { mode: "number" }),
     createdAt: createdAt(),
   },

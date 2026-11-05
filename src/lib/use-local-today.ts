@@ -2,21 +2,17 @@
 
 import { useSyncExternalStore } from "react";
 
-// Today's date in the user's timezone, as "YYYY-MM-DD".
-//
-// The server can't know the user's timezone (Vercel runs on UTC), and if the
-// server rendered one date and the browser another, React would report a
-// hydration mismatch. useSyncExternalStore handles that: during server render
-// and hydration it uses getServerSnapshot (""), then immediately re-renders
-// with the browser's value.
+// The server doesn't know the user's timezone, so it renders "" and the client
+// fills in the local date after hydration (avoiding a hydration mismatch).
 function localToday() {
   const d = new Date();
   const pad = (n: number) => String(n).padStart(2, "0");
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
-const subscribe = () => () => {}; // The date doesn't need live updates.
+const subscribe = () => () => {};
 
+/** Today's date in the user's timezone (YYYY-MM-DD), or "" on the server. */
 export function useLocalToday(): string {
   return useSyncExternalStore(subscribe, localToday, () => "");
 }

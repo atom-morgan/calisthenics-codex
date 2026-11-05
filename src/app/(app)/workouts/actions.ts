@@ -9,9 +9,7 @@ import {
   workoutInputSchema,
 } from "@/lib/validation/workout";
 
-// Takes a plain object instead of FormData: Server Actions accept any
-// serializable argument. It's typed `unknown` on purpose, since anyone can
-// call this endpoint with anything, so Zod decides what it is.
+// `input` is `unknown`: Server Actions are public endpoints, so Zod decides.
 export async function createWorkoutAction(
   _prev: WorkoutFormState,
   input: unknown,
@@ -38,6 +36,5 @@ export async function createWorkoutAction(
     return { error: "Couldn't save your workout. Please try again." };
   }
 
-  // Outside the try/catch: redirect() works by throwing.
   redirect("/workouts");
 }

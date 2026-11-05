@@ -1,7 +1,5 @@
 import { z } from "zod";
 
-// Validated once at import, so a missing variable fails loudly at startup
-// instead of as a confusing auth error later.
 const envSchema = z.object({
   SUPABASE_URL: z.url().refine((url) => new URL(url).pathname === "/", {
     message:

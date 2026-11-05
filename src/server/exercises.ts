@@ -6,8 +6,7 @@ import { exercises } from "@/db/schema";
 
 export type ExerciseOption = { id: string; name: string };
 
-// The exercise list is shared by all users (seeded, plus user-created on Day 2),
-// so there's no per-user filter. Callers still require a logged-in user.
+// Exercises are shared across users, so there's no per-user filter.
 export async function listExercises(): Promise<ExerciseOption[]> {
   return db
     .select({ id: exercises.id, name: exercises.name })
