@@ -1,6 +1,6 @@
 import "server-only";
 
-import { inArray } from "drizzle-orm";
+import { asc, desc, eq, inArray } from "drizzle-orm";
 import { db } from "@/db";
 import { exercises, sets, workouts } from "@/db/schema";
 import type { WorkoutInput } from "@/lib/validation/workout";
@@ -65,4 +65,72 @@ export async function createWorkout(
 
     return { id: workout.id };
   });
+}
+
+export type WorkoutSummary = {
+  id: string;
+  performedOn: string; // "YYYY-MM-DD"
+  notes: string | null;
+  exercises: {
+    position: number;
+    name: string;
+    sets: {
+      setNumber: number;
+      reps: number | null;
+      durationSec: number | null;
+      addedWeightLb: number | null;
+    }[];
+  }[];
+};
+
+// The latest workouts for `userId`, newest first, each with its exercises in
+// the order they were logged. As with createWorkout, `userId` must come from
+// requireUser(), never from request input: this filter IS the access rule.
+//
+// Two queries instead of one per workout (the "N+1" problem): first the
+// workouts, then every set for those workouts in one go, grouped in memory.
+export async function listWorkoutsForUser(
+  userId: string,
+  { limit = 20 }: { limit?: number } = {},
+): Promise<WorkoutSummary[]> {
+  const workoutRows = await db
+    .select({ id: workouts.id, performedOn: workouts.performedOn, notes: workouts.notes })
+    .from(workouts)
+    .where(eq(workouts.userId, userId))
+    // createdAt breaks ties when two workouts share a date.
+    .orderBy(desc(workouts.performedOn), desc(workouts.createdAt))
+    .limit(limit);
+
+  if (workoutRows.length === 0) return [];
+
+  const setRows = await db
+    .select({
+      workoutId: sets.workoutId,
+      position: sets.exercisePosition,
+      name: exercises.name,
+      setNumber: sets.setNumber,
+      reps: sets.reps,
+      durationSec: sets.durationSec,
+      addedWeightLb: sets.addedWeightLb,
+    })
+    .from(sets)
+    .innerJoin(exercises, eq(exercises.id, sets.exerciseId))
+    .where(inArray(sets.workoutId, workoutRows.map((w) => w.id)))
+    .orderBy(asc(sets.exercisePosition), asc(sets.setNumber));
+
+  // Rows arrive sorted by position then set number, so pushing in order keeps
+  // both the exercise order and the set order.
+  const byWorkout = new Map<string, WorkoutSummary["exercises"]>();
+  for (const { workoutId, position, name, ...set } of setRows) {
+    const blocks = byWorkout.get(workoutId) ?? [];
+    let block = blocks.find((b) => b.position === position);
+    if (!block) {
+      block = { position, name, sets: [] };
+      blocks.push(block);
+    }
+    block.sets.push(set);
+    byWorkout.set(workoutId, blocks);
+  }
+
+  return workoutRows.map((w) => ({ ...w, exercises: byWorkout.get(w.id) ?? [] }));
 }
