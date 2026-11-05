@@ -2,7 +2,7 @@ import { FieldError } from "@/components/ui/alert";
 import { inputClasses } from "@/components/ui/input";
 import type { SetDraft, SetField } from "./workout-draft";
 
-export const SET_GRID = "grid grid-cols-[2.5rem_1fr_1fr_1fr_2rem] gap-2";
+export const SET_GRID = "grid grid-cols-[2.5rem_1fr_1fr_1fr_2.5rem] gap-2";
 
 type SetRowProps = {
   set: SetDraft;
@@ -60,9 +60,19 @@ export function SetRow({
             type="button"
             onClick={onRemove}
             aria-label={`Remove set ${label}`}
-            className="rounded-md text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
+            className="flex size-10 items-center justify-center rounded-md text-zinc-500 hover:bg-red-50 hover:text-red-600 dark:text-zinc-400 dark:hover:bg-red-950 dark:hover:text-red-400"
           >
-            ×
+            <svg
+              viewBox="0 0 24 24"
+              className="size-4"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              strokeLinecap="round"
+              aria-hidden="true"
+            >
+              <path d="M18 6 6 18M6 6l12 12" />
+            </svg>
           </button>
         ) : (
           <span />
