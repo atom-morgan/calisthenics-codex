@@ -51,6 +51,7 @@ Index: (`user_id`, `performed_on` desc), since history views query this constant
 | id | uuid, PK | |
 | workout_id | uuid, FK to workouts.id, not null | `ON DELETE CASCADE` |
 | exercise_id | uuid, FK to exercises.id, not null | |
+| exercise_position | integer, not null | Which exercise block in the workout (1 = first logged), so history shows exercises in the order they were done |
 | set_number | integer, not null | Order within the exercise for that workout |
 | reps | integer, nullable | Null for timed holds |
 | duration_sec | integer, nullable | For holds (planche, L-sit, etc.) |

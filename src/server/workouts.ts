@@ -41,17 +41,19 @@ export async function createWorkout(
       })
       .returning({ id: workouts.id });
 
-    // set_number is assigned here from the order of the sets, never taken
-    // from the client. It counts per exercise, so if the same exercise appears
-    // in two blocks, numbering continues (1, 2, 3, then 4, 5).
+    // Ordering is assigned here from array order, never taken from the client:
+    // - exercise_position: which block (1 = first exercise logged).
+    // - set_number: counts per exercise, so if the same exercise appears in
+    //   two blocks, numbering continues (1, 2, 3, then 4, 5).
     const nextSetNumber = new Map<string, number>();
-    const rows = input.exercises.flatMap((entry) =>
+    const rows = input.exercises.flatMap((entry, entryIndex) =>
       entry.sets.map((set) => {
         const setNumber = (nextSetNumber.get(entry.exerciseId) ?? 0) + 1;
         nextSetNumber.set(entry.exerciseId, setNumber);
         return {
           workoutId: workout.id,
           exerciseId: entry.exerciseId,
+          exercisePosition: entryIndex + 1,
           setNumber,
           reps: set.reps ?? null,
           durationSec: set.durationSec ?? null,

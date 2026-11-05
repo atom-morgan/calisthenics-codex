@@ -109,6 +109,10 @@ export const sets = pgTable(
     exerciseId: uuid("exercise_id")
       .notNull()
       .references(() => exercises.id),
+    // Which block of the workout this set belongs to (1 = first exercise
+    // logged). Keeps the order the athlete did things in; set_number orders
+    // sets within the block's exercise.
+    exercisePosition: integer("exercise_position").notNull(),
     setNumber: integer("set_number").notNull(),
     reps: integer("reps"),
     durationSec: integer("duration_sec"),
@@ -125,6 +129,7 @@ export const sets = pgTable(
       sql`${t.reps} is not null or ${t.durationSec} is not null`,
     ),
     check("sets_set_number_positive", sql`${t.setNumber} > 0`),
+    check("sets_exercise_position_positive", sql`${t.exercisePosition} > 0`),
     check(
       "sets_values_non_negative",
       sql`coalesce(${t.reps}, 0) >= 0 and coalesce(${t.durationSec}, 0) >= 0 and coalesce(${t.addedWeightLb}, 0) >= 0`,
