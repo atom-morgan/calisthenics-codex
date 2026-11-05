@@ -119,7 +119,7 @@ export function interpretModelOutput(
 
     if (!match) {
       warnings.push(
-        `${label} isn't in the exercise list. Pick one, or add it as new.`,
+        `${label} isn't in the exercise list, so it will be added as a new exercise. Pick one from the list if it's already there.`,
       );
     }
 

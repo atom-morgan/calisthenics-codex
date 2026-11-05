@@ -173,7 +173,7 @@ describe("interpretModelOutput", () => {
       ],
       notes: null,
       warnings: [
-        "“archer pushups” isn't in the exercise list. Pick one, or add it as new.",
+        "“archer pushups” isn't in the exercise list, so it will be added as a new exercise. Pick one from the list if it's already there.",
       ],
     });
   });

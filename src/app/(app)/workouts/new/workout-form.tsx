@@ -13,10 +13,13 @@ import { Button } from "@/components/ui/button";
 import { inputClasses } from "@/components/ui/input";
 import { useLocalToday } from "@/lib/use-local-today";
 import type { WorkoutFormState } from "@/lib/validation/workout";
+import type { ParsedExercise } from "@/lib/workout-parser/parse";
 import type { ExerciseOption } from "@/server/exercises";
 import { createWorkoutAction } from "../actions";
+import { DescribeWorkout } from "./describe-workout";
 import { ExerciseBlock } from "./exercise-block";
 import {
+  draftsFromParsed,
   emptyExercise,
   exercisesReducer,
   toWorkoutInput,
@@ -47,74 +50,93 @@ export function WorkoutForm({ exercises }: { exercises: ExerciseOption[] }) {
     );
   }
 
+  function handleParsed(parsed: {
+    exercises: ParsedExercise[];
+    notes: string | null;
+  }) {
+    dispatch({
+      type: "appendParsed",
+      exercises: draftsFromParsed(parsed.exercises, newKey),
+    });
+    if (parsed.notes) {
+      setNotes((current) =>
+        current ? `${current}; ${parsed.notes}` : (parsed.notes ?? ""),
+      );
+    }
+  }
+
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-6" noValidate>
-      <div className="grid gap-4 sm:grid-cols-[12rem_1fr]">
-        <label className="flex flex-col gap-1">
-          <span className="text-sm font-medium">Date</span>
-          <input
-            type="date"
-            value={performedOn}
-            max={today || undefined}
-            onChange={(e) => setDate(e.target.value)}
-            aria-invalid={Boolean(issues.performedOn)}
-            className={inputClasses}
-            required
+    <div className="flex flex-col gap-6">
+      <DescribeWorkout onParsed={handleParsed} />
+      <form onSubmit={handleSubmit} className="flex flex-col gap-6" noValidate>
+        <div className="grid gap-4 sm:grid-cols-[12rem_1fr]">
+          <label className="flex flex-col gap-1">
+            <span className="text-sm font-medium">Date</span>
+            <input
+              type="date"
+              value={performedOn}
+              max={today || undefined}
+              onChange={(e) => setDate(e.target.value)}
+              aria-invalid={Boolean(issues.performedOn)}
+              className={inputClasses}
+              required
+            />
+            <FieldError message={issues.performedOn} />
+          </label>
+          <label className="flex flex-col gap-1">
+            <span className="text-sm font-medium">
+              Notes{" "}
+              <span className="font-normal text-zinc-500">(optional)</span>
+            </span>
+            <input
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Felt strong, short rest"
+              aria-invalid={Boolean(issues.notes)}
+              className={inputClasses}
+            />
+            <FieldError message={issues.notes} />
+          </label>
+        </div>
+
+        <FieldError message={issues.exercises} />
+
+        {drafts.map((exercise, index) => (
+          <ExerciseBlock
+            key={exercise.key}
+            exercise={exercise}
+            index={index}
+            options={exercises}
+            issues={issues}
+            canRemove={drafts.length > 1}
+            dispatch={dispatch}
           />
-          <FieldError message={issues.performedOn} />
-        </label>
-        <label className="flex flex-col gap-1">
-          <span className="text-sm font-medium">
-            Notes <span className="font-normal text-zinc-500">(optional)</span>
-          </span>
-          <input
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            placeholder="Felt strong, short rest"
-            aria-invalid={Boolean(issues.notes)}
-            className={inputClasses}
-          />
-          <FieldError message={issues.notes} />
-        </label>
-      </div>
+        ))}
 
-      <FieldError message={issues.exercises} />
-
-      {drafts.map((exercise, index) => (
-        <ExerciseBlock
-          key={exercise.key}
-          exercise={exercise}
-          index={index}
-          options={exercises}
-          issues={issues}
-          canRemove={drafts.length > 1}
-          dispatch={dispatch}
-        />
-      ))}
-
-      <Button
-        variant="secondary"
-        className="self-start border-dashed"
-        onClick={() =>
-          dispatch({ type: "addExercise", key: newKey(), setKey: newKey() })
-        }
-      >
-        + Add exercise
-      </Button>
-
-      {state.error && <ErrorAlert>{state.error}</ErrorAlert>}
-
-      <div className="flex items-center gap-3">
-        <Button type="submit" disabled={pending || !performedOn}>
-          {pending ? "Saving…" : "Save workout"}
-        </Button>
-        <Link
-          href="/workouts"
-          className="text-sm text-zinc-600 underline dark:text-zinc-400"
+        <Button
+          variant="secondary"
+          className="self-start border-dashed"
+          onClick={() =>
+            dispatch({ type: "addExercise", key: newKey(), setKey: newKey() })
+          }
         >
-          Cancel
-        </Link>
-      </div>
-    </form>
+          + Add exercise
+        </Button>
+
+        {state.error && <ErrorAlert>{state.error}</ErrorAlert>}
+
+        <div className="flex items-center gap-3">
+          <Button type="submit" disabled={pending || !performedOn}>
+            {pending ? "Saving…" : "Save workout"}
+          </Button>
+          <Link
+            href="/workouts"
+            className="text-sm text-zinc-600 underline dark:text-zinc-400"
+          >
+            Cancel
+          </Link>
+        </div>
+      </form>
+    </div>
   );
 }

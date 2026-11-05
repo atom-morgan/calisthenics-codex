@@ -6,6 +6,9 @@ import type { ExerciseOption } from "@/server/exercises";
 import { SET_GRID, SetRow } from "./set-row";
 import type { ExerciseDraft, ExercisesAction } from "./workout-draft";
 
+// Can't collide with an exercise id, which is always a UUID.
+const NEW_EXERCISE = "new";
+
 type ExerciseBlockProps = {
   exercise: ExerciseDraft;
   index: number;
@@ -25,6 +28,7 @@ export function ExerciseBlock({
 }: ExerciseBlockProps) {
   const path = `exercises.${index}`;
   const exerciseKey = exercise.key;
+  const isNew = exercise.newExerciseName !== null;
 
   return (
     <fieldset className="flex flex-col gap-3 rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
@@ -33,13 +37,17 @@ export function ExerciseBlock({
         <label className="flex flex-1 flex-col gap-1">
           <span className="text-sm font-medium">Exercise</span>
           <select
-            value={exercise.exerciseId}
+            value={isNew ? NEW_EXERCISE : exercise.exerciseId}
             onChange={(e) =>
-              dispatch({
-                type: "selectExercise",
-                exerciseKey,
-                exerciseId: e.target.value,
-              })
+              dispatch(
+                e.target.value === NEW_EXERCISE
+                  ? { type: "chooseNewExercise", exerciseKey }
+                  : {
+                      type: "selectExercise",
+                      exerciseKey,
+                      exerciseId: e.target.value,
+                    },
+              )
             }
             aria-invalid={Boolean(issues[`${path}.exerciseId`])}
             className={inputClasses}
@@ -50,8 +58,27 @@ export function ExerciseBlock({
                 {option.name}
               </option>
             ))}
+            <option value={NEW_EXERCISE}>New exercise…</option>
           </select>
         </label>
+        {isNew && (
+          <label className="flex flex-1 flex-col gap-1">
+            <span className="text-sm font-medium">New exercise name</span>
+            <input
+              value={exercise.newExerciseName ?? ""}
+              onChange={(e) =>
+                dispatch({
+                  type: "renameNewExercise",
+                  exerciseKey,
+                  name: e.target.value,
+                })
+              }
+              placeholder="Archer pull-up"
+              aria-invalid={Boolean(issues[`${path}.newExerciseName`])}
+              className={inputClasses}
+            />
+          </label>
+        )}
         {canRemove && (
           <Button
             variant="ghost"
@@ -62,7 +89,11 @@ export function ExerciseBlock({
           </Button>
         )}
       </div>
-      <FieldError message={issues[`${path}.exerciseId`]} />
+      <FieldError
+        message={
+          issues[`${path}.exerciseId`] ?? issues[`${path}.newExerciseName`]
+        }
+      />
 
       <div className={`${SET_GRID} text-xs font-medium text-zinc-500`}>
         <span>Set</span>

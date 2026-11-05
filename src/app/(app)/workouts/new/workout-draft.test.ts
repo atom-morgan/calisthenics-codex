@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  draftsFromParsed,
   emptyExercise,
   type ExerciseDraft,
   exercisesReducer,
@@ -107,6 +108,54 @@ describe("exercisesReducer", () => {
     expect(state[0]).toBe(two[0]);
   });
 
+  it("switches between a listed exercise and a new one", () => {
+    const asNew = exercisesReducer(
+      exercisesReducer(initial(), {
+        type: "chooseNewExercise",
+        exerciseKey: "e1",
+      }),
+      { type: "renameNewExercise", exerciseKey: "e1", name: "Archer pull-up" },
+    );
+    expect(asNew[0]).toMatchObject({
+      exerciseId: "",
+      newExerciseName: "Archer pull-up",
+    });
+
+    const listed = exercisesReducer(asNew, {
+      type: "selectExercise",
+      exerciseKey: "e1",
+      exerciseId: "pull-up",
+    });
+    expect(listed[0]).toMatchObject({
+      exerciseId: "pull-up",
+      newExerciseName: null,
+    });
+  });
+
+  it("appends parsed exercises, replacing only blank ones", () => {
+    const parsed = emptyExercise("p1", "ps1");
+    // e1 is blank and gets replaced; e2 has input and stays.
+    const withInput = exercisesReducer(
+      exercisesReducer(initial(), {
+        type: "addExercise",
+        key: "e2",
+        setKey: "s2",
+      }),
+      {
+        type: "updateSet",
+        exerciseKey: "e2",
+        setKey: "s2",
+        field: "reps",
+        value: "5",
+      },
+    );
+    const state = exercisesReducer(withInput, {
+      type: "appendParsed",
+      exercises: [parsed],
+    });
+    expect(state.map((e) => e.key)).toEqual(["e2", "p1"]);
+  });
+
   it("does not mutate the previous state", () => {
     const before = initial();
     const snapshot = structuredClone(before);
@@ -116,12 +165,69 @@ describe("exercisesReducer", () => {
   });
 });
 
+describe("draftsFromParsed", () => {
+  const keys = () => {
+    let n = 0;
+    return () => `k${++n}`;
+  };
+
+  it("turns parsed sets into form strings", () => {
+    const [draft] = draftsFromParsed(
+      [
+        {
+          heard: "pullups",
+          exerciseId: "pull-up",
+          name: "Pull-up",
+          sets: [{ reps: 5, addedWeightLb: 22.5 }, { durationSec: 30 }],
+        },
+      ],
+      keys(),
+    );
+    expect(draft).toStrictEqual({
+      key: "k1",
+      exerciseId: "pull-up",
+      newExerciseName: null,
+      sets: [
+        { key: "k2", reps: "5", durationSec: "", addedWeightLb: "22.5" },
+        { key: "k3", reps: "", durationSec: "30", addedWeightLb: "" },
+      ],
+    });
+  });
+
+  it("starts unmatched exercises as new, named as heard, with an empty set", () => {
+    const [draft] = draftsFromParsed(
+      [{ heard: "diamond pushups", exerciseId: null, name: null, sets: [] }],
+      keys(),
+    );
+    expect(draft).toMatchObject({
+      exerciseId: "",
+      newExerciseName: "Diamond pushups",
+      sets: [{ reps: "", durationSec: "", addedWeightLb: "" }],
+    });
+  });
+});
+
 describe("toWorkoutInput", () => {
+  it("sends a new exercise by name instead of id", () => {
+    const drafts: ExerciseDraft[] = [
+      {
+        key: "e1",
+        exerciseId: "",
+        newExerciseName: "Archer pull-up",
+        sets: [{ key: "s1", reps: "3", durationSec: "", addedWeightLb: "" }],
+      },
+    ];
+    const [entry] = toWorkoutInput("2026-11-04", "", drafts).exercises;
+    expect(entry).not.toHaveProperty("exerciseId");
+    expect(entry.newExerciseName).toBe("Archer pull-up");
+  });
+
   it("converts strings to numbers and blanks to undefined", () => {
     const drafts: ExerciseDraft[] = [
       {
         key: "e1",
         exerciseId: "pull-up",
+        newExerciseName: null,
         sets: [
           { key: "s1", reps: "8", durationSec: "", addedWeightLb: "" },
           { key: "s2", reps: " ", durationSec: "30", addedWeightLb: "12.5" },
@@ -148,6 +254,7 @@ describe("toWorkoutInput", () => {
       {
         key: "e1",
         exerciseId: "pull-up",
+        newExerciseName: null,
         sets: [{ key: "s1", reps: "abc", durationSec: "", addedWeightLb: "" }],
       },
     ];
