@@ -2,6 +2,7 @@ import type { Dispatch } from "react";
 import { FieldError } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { inputClasses } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import type { ExerciseOption } from "@/server/exercises";
 import { SET_GRID, SetRow } from "./set-row";
 import type { ExerciseDraft, ExercisesAction } from "./workout-draft";
@@ -36,7 +37,7 @@ export function ExerciseBlock({
       <div className="flex items-end gap-2">
         <label className="flex flex-1 flex-col gap-1">
           <span className="text-sm font-medium">Exercise</span>
-          <select
+          <Select
             value={isNew ? NEW_EXERCISE : exercise.exerciseId}
             onChange={(e) =>
               dispatch(
@@ -50,7 +51,6 @@ export function ExerciseBlock({
               )
             }
             aria-invalid={Boolean(issues[`${path}.exerciseId`])}
-            className={inputClasses}
           >
             <option value="">Choose…</option>
             {options.map((option) => (
@@ -59,7 +59,7 @@ export function ExerciseBlock({
               </option>
             ))}
             <option value={NEW_EXERCISE}>New exercise…</option>
-          </select>
+          </Select>
         </label>
         {isNew && (
           <label className="flex flex-1 flex-col gap-1">
