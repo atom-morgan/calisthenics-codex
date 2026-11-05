@@ -26,6 +26,7 @@ I'm an experienced front-end engineer (mostly Angular) returning to development 
 - **Commit often.** Small commits with clear messages (e.g., `feat: add workout form`, `test: cover parser edge cases`). Don't commit until I've reviewed the change.
 - **Flag unfamiliar patterns.** If you use something that's new since ~2020 (server components, server actions, route handlers, etc.), add a one-line explanation in your response.
 - **Tell me when you're unsure.** If a decision is a judgment call, say so rather than picking silently.
+- **Log lessons as they happen.** When we hit a bug, a gotcha, or a framework change that contradicts older docs, add an entry to `docs/lessons.md` (problem, cause, fix, takeaway) in the same commit as the fix. Design choices go in `docs/decisions.md` instead.
 
 ## Code standards
 
