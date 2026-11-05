@@ -75,3 +75,45 @@ Short records of the choices that shaped this codebase: what we chose, why, and 
 **Decision:** `workouts.performed_on` is a Postgres `date`, handled as a `YYYY-MM-DD` string and formatted in UTC. The form's default "today" is computed in the browser.
 
 **Why:** A workout happens on a day, not at an instant. Parsing `"2026-11-04"` with `new Date()` gives midnight UTC, which displays as Nov 3 in US timezones. The server (UTC on Vercel) can't know the user's local date, so the form gets it from the browser via `useSyncExternalStore`, which avoids a hydration mismatch.
+
+## 11. Natural-language entry fills the form; the form is the preview
+
+**Decision:** Parsed text is added to the existing workout form, which the user reviews, edits, and saves through the same `createWorkout` path as manual entry. The parser runs in a Server Action (`parseWorkoutAction`) and never writes to the database.
+
+**Why:** One save path and one set of validation rules. Editing a parsed result is just editing the form. Anything the parser couldn't read becomes a warning in the preview rather than a guessed value.
+
+**Alternatives:** A separate read-only preview with Confirm/Edit steps: a second view of the same data and a second save path. A Route Handler (`POST /api/parse`) instead of a Server Action: worth it only if something other than our own UI needed to call it.
+
+## 12. LLM output is never trusted
+
+**Decision:** Three layers between the model and the database:
+
+1. Structured output with a deliberately loose schema (shape only; exercise names constrained to an enum of the catalog).
+2. `interpretModelOutput` validates every set with the form's own `setInputSchema`, drops bad ones with a warning, and maps names to ids.
+3. The saved workout is validated again by `workoutInputSchema` in `createWorkoutAction`, like any manual entry.
+
+The user's text is wrapped in `<workout>` tags and the prompt treats it as data. A successful prompt injection can at worst produce an odd draft the user sees before saving: the model has no tools and no database access.
+
+**Why:** A strict schema in layer 1 would make the SDK throw away the whole response over one bad value (see [lessons.md](lessons.md#15-strict-structured-output-schemas-throw-away-whole-responses)).
+
+## 13. Haiku for parsing, chosen by eval
+
+**Decision:** The parser uses Claude Haiku 5.5 at `low` effort, with a 15-second timeout and one retry. `npm run eval:parser` scores a model against 15 fixed cases.
+
+**Why:** On the eval, Haiku and Opus 5.5 both scored 15/15. Haiku's median latency was 1.4s against 2.1s, at roughly 1/40th of the cost (about $0.0003 per parse). Opus is one argument away if accuracy ever becomes the problem.
+
+**Alternatives:** Opus by default: slower and more expensive with no measured accuracy gain on this task. The model is injected (`WorkoutModel`), so unit tests use canned responses instead of mocking the SDK.
+
+## 14. New exercises are created at save time, in a shared catalog
+
+**Decision:** An exercise entry is either an `exerciseId` or a `newExerciseName`. `createWorkout` resolves new names in the same transaction with `INSERT ... ON CONFLICT DO NOTHING` against the `lower(name)` unique index, so a "new" name that already exists reuses that exercise. The catalog is shared by all users.
+
+**Why:** Parsing shouldn't write data the user may never save. Letting the unique index decide makes find-or-create safe under concurrent saves, unlike a check-then-insert in code.
+
+**Trade-off:** One user's custom exercise appears in everyone's list. For a real product, show seeded exercises plus your own (`created_by IS NULL OR created_by = me`).
+
+## 15. Known gap: no rate limit on parsing
+
+**Decision:** Not addressed yet. Parsing requires a logged-in user and input is capped at 1,000 characters, but a user could still call it repeatedly and run up API costs.
+
+**Why deferred:** An in-memory limiter doesn't work across serverless instances; a real one needs shared storage (a Postgres table or a Redis-backed limiter). The per-parse cost is small (decision 13), so this is a hardening task rather than a blocker.
