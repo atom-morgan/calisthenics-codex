@@ -5,10 +5,25 @@ export function ErrorAlert({ children }: { children: ReactNode }) {
   return (
     <p
       role="alert"
-      className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950 dark:text-red-300"
+      className="rounded-lg border border-danger/30 bg-danger-soft px-3 py-2 text-sm text-danger"
     >
       {children}
     </p>
+  );
+}
+
+/** Non-blocking notes the user should review. Renders nothing when empty. */
+export function WarningList({ warnings }: { warnings: string[] }) {
+  if (warnings.length === 0) return null;
+  return (
+    <ul
+      role="status"
+      className="flex list-disc flex-col gap-1 rounded-lg border border-warning/30 bg-warning-soft py-2 pr-3 pl-7 text-sm text-warning"
+    >
+      {warnings.map((warning) => (
+        <li key={warning}>{warning}</li>
+      ))}
+    </ul>
   );
 }
 
@@ -16,7 +31,7 @@ export function ErrorAlert({ children }: { children: ReactNode }) {
 export function FieldError({ id, message }: { id?: string; message?: string }) {
   if (!message) return null;
   return (
-    <p id={id} className="text-sm text-red-600 dark:text-red-400">
+    <p id={id} className="text-sm text-danger">
       {message}
     </p>
   );

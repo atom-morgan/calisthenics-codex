@@ -56,7 +56,7 @@ Write comments for a teammate who knows React, Next.js, and TypeScript, the way 
   - `src/app/`: routes. Route-specific components and Server Actions sit next to the route that uses them.
   - `src/actions/`: Server Actions shared by more than one route group.
   - `src/server/`: data access and auth (`import "server-only"`). Every function takes the user id from `requireUser()`.
-  - `src/components/ui/`: shared primitives (`Button`, `ErrorAlert`, `FieldError`, `Select`, `inputClasses`). Reuse them instead of copying class strings.
+  - `src/components/ui/`: shared primitives (`Button`, `Badge`, `ErrorAlert`, `FieldError`, `WarningList`, `Select`, `cardClasses`, `inputClasses`). Reuse them instead of copying class strings.
   - `src/lib/`: framework-agnostic helpers and Zod schemas (`lib/validation/`).
 - **Components:** extract a component when a file mixes several concerns or passes ~150 lines. Use `useReducer` (with a pure, tested reducer) for related or nested state.
 - **Server Actions:** treat input as `unknown` and validate with Zod; get the user from `requireUser()`; call `redirect()` outside `try/catch`.

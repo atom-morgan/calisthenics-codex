@@ -1,41 +1,52 @@
 import type { ButtonHTMLAttributes } from "react";
 
 const base =
-  "inline-flex items-center justify-center rounded-md font-medium disabled:opacity-60";
+  "inline-flex items-center justify-center gap-2 font-medium transition-colors duration-200 ease-out outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-page disabled:pointer-events-none disabled:opacity-50";
 
 const variants = {
-  primary:
-    "bg-zinc-900 text-white hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300",
-  secondary:
-    "border border-zinc-300 hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-900",
-  ghost: "hover:bg-zinc-100 dark:hover:bg-zinc-900",
+  primary: "bg-accent text-accent-fg hover:bg-accent/85",
+  secondary: "border border-line-strong text-fg hover:bg-fg/5",
+  ghost: "text-muted hover:bg-fg/5 hover:text-fg",
 };
 
 const sizes = {
-  sm: "px-3 py-1 text-sm",
-  md: "px-4 py-2",
+  sm: "h-8 px-3 text-sm",
+  md: "h-11 px-5 text-sm",
 };
 
 type Variant = keyof typeof variants;
 type Size = keyof typeof sizes;
 
+type ButtonStyle = {
+  variant?: Variant;
+  size?: Size;
+  /** Fully rounded, for marketing calls to action. */
+  pill?: boolean;
+  className?: string;
+};
+
 /** Button classes, for elements that should look like a button (e.g. `<Link>`). */
 export function buttonClasses({
   variant = "primary",
   size = "md",
+  pill = false,
   className = "",
-}: { variant?: Variant; size?: Size; className?: string } = {}) {
-  return [base, variants[variant], sizes[size], className].join(" ");
+}: ButtonStyle = {}) {
+  return [
+    base,
+    variants[variant],
+    sizes[size],
+    pill ? "rounded-full" : "rounded-lg",
+    className,
+  ].join(" ");
 }
 
-type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: Variant;
-  size?: Size;
-};
+type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & ButtonStyle;
 
 export function Button({
   variant,
   size,
+  pill,
   className,
   type = "button",
   ...props
@@ -43,7 +54,7 @@ export function Button({
   return (
     <button
       type={type}
-      className={buttonClasses({ variant, size, className })}
+      className={buttonClasses({ variant, size, pill, className })}
       {...props}
     />
   );

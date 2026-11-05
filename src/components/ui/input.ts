@@ -1,3 +1,3 @@
-/** Shared styles for text inputs and selects. */
+/** Shared styles for text inputs, textareas, and selects. */
 export const inputClasses =
-  "w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-zinc-900 outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 aria-invalid:border-red-600 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:focus:border-zinc-100 dark:focus:ring-zinc-100";
+  "min-h-11 w-full rounded-lg border border-line bg-page px-3 py-2.5 text-sm text-fg outline-none transition-colors duration-200 ease-out placeholder:text-muted/70 hover:border-line-strong focus:border-focus focus:ring-2 focus:ring-focus/40 aria-invalid:border-danger";

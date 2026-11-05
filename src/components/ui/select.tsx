@@ -26,7 +26,7 @@ export function Select({
         strokeWidth={2}
         strokeLinecap="round"
         strokeLinejoin="round"
-        className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-zinc-500"
+        className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-muted"
       >
         <path d="m6 9 6 6 6-6" />
       </svg>
