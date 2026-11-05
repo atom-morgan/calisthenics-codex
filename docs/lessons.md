@@ -147,3 +147,13 @@ Bugs, gotchas, and surprises hit while building this, with the cause, the fix, a
 **Fix:** The schema sent to the model only fixes the shape ([`workout-parser/schema.ts`](../src/lib/workout-parser/schema.ts)). [`parse.ts`](../src/lib/workout-parser/parse.ts) then validates each set with the form's own `setInputSchema`, keeps the good ones, and turns the rest into warnings for the preview.
 
 **Takeaway:** Structured output guarantees parseable JSON of the right shape, not correct values. Validate LLM output yourself, at a granularity where one bad value doesn't discard the good ones. Found by reading the SDK source, not the docs.
+
+### 16. `toEqual` ignores keys set to `undefined`
+
+**Problem:** The first eval run failed 13 of 15 cases on both models, yet "expected" and "got" printed identically.
+
+**Cause:** The parser mapped `null` to `undefined` before Zod validation, and Zod keeps keys that are present, so sets came out as `{ reps: 8, durationSec: undefined, addedWeightLb: undefined }`. `JSON.stringify` drops those keys and Vitest's `toEqual` treats them as missing, so the unit tests passed. Node's `isDeepStrictEqual` in the eval doesn't.
+
+**Fix:** Drop `null` keys before validating ([`parse.ts`](../src/lib/workout-parser/parse.ts)), and use `toStrictEqual` in the test that pins the exact output shape.
+
+**Takeaway:** `toEqual` is lenient about `undefined` properties; use `toStrictEqual` when the exact shape matters. And when a diff prints identical values, the difference is something the printer hides.

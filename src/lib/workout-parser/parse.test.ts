@@ -45,7 +45,8 @@ describe("parseWorkoutText", () => {
         unparsed: [],
       }),
     );
-    expect(result).toEqual({
+    // toStrictEqual: sets must not carry keys set to undefined.
+    expect(result).toStrictEqual({
       ok: true,
       exercises: [
         {

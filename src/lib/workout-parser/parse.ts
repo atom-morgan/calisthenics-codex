@@ -126,11 +126,13 @@ export function interpretModelOutput(
     const sets: SetInput[] = [];
     let skipped = 0;
     for (const set of entry.sets) {
-      const result = setInputSchema.safeParse({
-        reps: set.reps ?? undefined,
-        durationSec: set.durationSec ?? undefined,
-        addedWeightLb: set.addedWeightLb ?? undefined,
-      });
+      // Drop nulls rather than mapping them to undefined: Zod keeps keys that
+      // are present, and `{ reps: 8, durationSec: undefined }` would leak into
+      // the draft and fail strict equality.
+      const present = Object.fromEntries(
+        Object.entries(set).filter(([, value]) => value !== null),
+      );
+      const result = setInputSchema.safeParse(present);
       if (result.success) sets.push(result.data);
       else skipped++;
     }
