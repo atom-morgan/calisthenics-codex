@@ -1,0 +1,124 @@
+import type { Dispatch } from "react";
+import { FieldError } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { inputClasses } from "@/components/ui/input";
+import type { ExerciseOption } from "@/server/exercises";
+import { SET_GRID, SetRow } from "./set-row";
+import type { ExerciseDraft, ExercisesAction } from "./workout-draft";
+
+type ExerciseBlockProps = {
+  exercise: ExerciseDraft;
+  index: number;
+  options: ExerciseOption[];
+  issues: Record<string, string>;
+  canRemove: boolean;
+  dispatch: Dispatch<ExercisesAction>;
+};
+
+export function ExerciseBlock({
+  exercise,
+  index,
+  options,
+  issues,
+  canRemove,
+  dispatch,
+}: ExerciseBlockProps) {
+  const path = `exercises.${index}`;
+  const exerciseKey = exercise.key;
+
+  return (
+    <fieldset className="flex flex-col gap-3 rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
+      <legend className="sr-only">Exercise {index + 1}</legend>
+      <div className="flex items-end gap-2">
+        <label className="flex flex-1 flex-col gap-1">
+          <span className="text-sm font-medium">Exercise</span>
+          <select
+            value={exercise.exerciseId}
+            onChange={(e) =>
+              dispatch({
+                type: "selectExercise",
+                exerciseKey,
+                exerciseId: e.target.value,
+              })
+            }
+            aria-invalid={Boolean(issues[`${path}.exerciseId`])}
+            className={inputClasses}
+          >
+            <option value="">Choose…</option>
+            {options.map((option) => (
+              <option key={option.id} value={option.id}>
+                {option.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        {canRemove && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => dispatch({ type: "removeExercise", exerciseKey })}
+          >
+            Remove exercise
+          </Button>
+        )}
+      </div>
+      <FieldError message={issues[`${path}.exerciseId`]} />
+
+      <div className={`${SET_GRID} text-xs font-medium text-zinc-500`}>
+        <span>Set</span>
+        <span>Reps</span>
+        <span>Hold (sec)</span>
+        <span>+ Weight (lb)</span>
+        <span />
+      </div>
+      {exercise.sets.map((set, setIndex) => {
+        const setPath = `${path}.sets.${setIndex}`;
+        return (
+          <SetRow
+            key={set.key}
+            set={set}
+            number={setIndex + 1}
+            label={`${index + 1}-${setIndex + 1}`}
+            // Refinement errors sit on the set; type errors on a field.
+            error={
+              issues[setPath] ??
+              issues[`${setPath}.reps`] ??
+              issues[`${setPath}.durationSec`] ??
+              issues[`${setPath}.addedWeightLb`]
+            }
+            onChange={(field, value) =>
+              dispatch({
+                type: "updateSet",
+                exerciseKey,
+                setKey: set.key,
+                field,
+                value,
+              })
+            }
+            onRemove={
+              exercise.sets.length > 1
+                ? () =>
+                    dispatch({
+                      type: "removeSet",
+                      exerciseKey,
+                      setKey: set.key,
+                    })
+                : undefined
+            }
+          />
+        );
+      })}
+      <FieldError message={issues[`${path}.sets`]} />
+      <Button
+        variant="ghost"
+        size="sm"
+        className="self-start"
+        onClick={() =>
+          dispatch({ type: "addSet", exerciseKey, key: crypto.randomUUID() })
+        }
+      >
+        + Add set
+      </Button>
+    </fieldset>
+  );
+}
