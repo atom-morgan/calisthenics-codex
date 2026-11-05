@@ -27,9 +27,14 @@ type SetValues = {
 };
 
 // One set as short text: "8", "20s", "5 × 10s", "6 +10 lb".
-export function formatSet({ reps, durationSec, addedWeightLb }: SetValues): string {
+export function formatSet({
+  reps,
+  durationSec,
+  addedWeightLb,
+}: SetValues): string {
   const parts: string[] = [];
-  if (reps !== null && durationSec !== null) parts.push(`${reps} × ${durationSec}s`);
+  if (reps !== null && durationSec !== null)
+    parts.push(`${reps} × ${durationSec}s`);
   else if (reps !== null) parts.push(String(reps));
   else if (durationSec !== null) parts.push(`${durationSec}s`);
   if (addedWeightLb) parts.push(`+${addedWeightLb} lb`);
@@ -41,9 +46,12 @@ export function formatSet({ reps, durationSec, addedWeightLb }: SetValues): stri
 // each set.
 export function formatSets(sets: SetValues[]): string {
   const weight = sets[0]?.addedWeightLb ?? null;
-  const sameWeight = weight !== null && sets.every((s) => s.addedWeightLb === weight);
+  const sameWeight =
+    weight !== null && sets.every((s) => s.addedWeightLb === weight);
   if (!sameWeight) return sets.map(formatSet).join(" · ");
 
-  const withoutWeight = sets.map((s) => formatSet({ ...s, addedWeightLb: null }));
+  const withoutWeight = sets.map((s) =>
+    formatSet({ ...s, addedWeightLb: null }),
+  );
   return `${withoutWeight.join(" · ")} (+${weight} lb)`;
 }

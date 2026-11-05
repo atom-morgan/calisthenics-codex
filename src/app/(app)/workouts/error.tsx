@@ -22,7 +22,9 @@ export default function WorkoutsError({
       role="alert"
       className="flex flex-col items-center gap-4 rounded-xl border border-red-200 bg-red-50 px-6 py-12 text-center dark:border-red-900 dark:bg-red-950"
     >
-      <p className="text-red-800 dark:text-red-200">Couldn&apos;t load your workouts.</p>
+      <p className="text-red-800 dark:text-red-200">
+        Couldn&apos;t load your workouts.
+      </p>
       <button
         type="button"
         // retry() re-fetches the page's data and re-renders it.

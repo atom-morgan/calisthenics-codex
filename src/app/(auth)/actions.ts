@@ -21,7 +21,10 @@ export async function login(
   _prev: AuthFormState,
   formData: FormData,
 ): Promise<AuthFormState> {
-  const raw = { email: text(formData, "email"), password: text(formData, "password") };
+  const raw = {
+    email: text(formData, "email"),
+    password: text(formData, "password"),
+  };
   const parsed = loginSchema.safeParse(raw);
   if (!parsed.success) {
     return {

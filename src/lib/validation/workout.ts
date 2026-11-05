@@ -5,7 +5,12 @@ import { z } from "zod";
 
 export const setInputSchema = z
   .object({
-    reps: z.number().int("Reps must be a whole number.").min(1).max(1000).optional(),
+    reps: z
+      .number()
+      .int("Reps must be a whole number.")
+      .min(1)
+      .max(1000)
+      .optional(),
     durationSec: z
       .number()
       .int("Hold time must be whole seconds.")

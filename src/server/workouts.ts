@@ -94,7 +94,11 @@ export async function listWorkoutsForUser(
   { limit = 20 }: { limit?: number } = {},
 ): Promise<WorkoutSummary[]> {
   const workoutRows = await db
-    .select({ id: workouts.id, performedOn: workouts.performedOn, notes: workouts.notes })
+    .select({
+      id: workouts.id,
+      performedOn: workouts.performedOn,
+      notes: workouts.notes,
+    })
     .from(workouts)
     .where(eq(workouts.userId, userId))
     // createdAt breaks ties when two workouts share a date.
@@ -115,7 +119,12 @@ export async function listWorkoutsForUser(
     })
     .from(sets)
     .innerJoin(exercises, eq(exercises.id, sets.exerciseId))
-    .where(inArray(sets.workoutId, workoutRows.map((w) => w.id)))
+    .where(
+      inArray(
+        sets.workoutId,
+        workoutRows.map((w) => w.id),
+      ),
+    )
     .orderBy(asc(sets.exercisePosition), asc(sets.setNumber));
 
   // Rows arrive sorted by position then set number, so pushing in order keeps
@@ -132,5 +141,8 @@ export async function listWorkoutsForUser(
     byWorkout.set(workoutId, blocks);
   }
 
-  return workoutRows.map((w) => ({ ...w, exercises: byWorkout.get(w.id) ?? [] }));
+  return workoutRows.map((w) => ({
+    ...w,
+    exercises: byWorkout.get(w.id) ?? [],
+  }));
 }

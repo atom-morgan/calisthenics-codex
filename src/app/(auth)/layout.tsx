@@ -4,7 +4,11 @@ import { getCurrentUser } from "@/server/auth";
 
 // Shared layout for /login and /signup (the "(auth)" folder doesn't appear in
 // the URL). Logged-in users have no reason to be here, so send them on.
-export default async function AuthLayout({ children }: { children: ReactNode }) {
+export default async function AuthLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
   if (await getCurrentUser()) redirect("/workouts");
 
   return (

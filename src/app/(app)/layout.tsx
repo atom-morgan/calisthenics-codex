@@ -18,7 +18,9 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
             Calisthenics Log
           </Link>
           <div className="flex items-center gap-3 text-sm">
-            <span className="text-zinc-600 dark:text-zinc-400">{user.name}</span>
+            <span className="text-zinc-600 dark:text-zinc-400">
+              {user.name}
+            </span>
             {/* A plain form posting to a Server Action: logout works even
                 before JavaScript loads. */}
             <form action={logout}>
@@ -32,7 +34,9 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
           </div>
         </div>
       </header>
-      <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-6">{children}</main>
+      <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-6">
+        {children}
+      </main>
     </div>
   );
 }

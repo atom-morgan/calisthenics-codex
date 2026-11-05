@@ -44,7 +44,9 @@ export default async function WorkoutsPage() {
                   </time>
                 </h2>
                 {workout.notes && (
-                  <p className="text-sm text-zinc-600 dark:text-zinc-400">{workout.notes}</p>
+                  <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                    {workout.notes}
+                  </p>
                 )}
               </div>
               <dl className="grid grid-cols-[minmax(7rem,auto)_1fr] gap-x-4 gap-y-1 text-sm">
@@ -63,7 +65,9 @@ export default async function WorkoutsPage() {
       )}
 
       {workouts.length === 20 && (
-        <p className="text-center text-sm text-zinc-500">Showing your 20 most recent workouts.</p>
+        <p className="text-center text-sm text-zinc-500">
+          Showing your 20 most recent workouts.
+        </p>
       )}
     </div>
   );

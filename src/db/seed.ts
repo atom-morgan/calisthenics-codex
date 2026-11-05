@@ -44,7 +44,9 @@ async function main() {
     .returning({ name: exercises.name });
 
   const skipped = SEED_EXERCISES.length - inserted.length;
-  console.log(`Seeded ${inserted.length} exercises (${skipped} already existed).`);
+  console.log(
+    `Seeded ${inserted.length} exercises (${skipped} already existed).`,
+  );
 }
 
 main()

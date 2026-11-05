@@ -2,7 +2,11 @@
 // the page in a <Suspense> boundary with this as the fallback).
 export default function Loading() {
   return (
-    <div className="flex flex-col gap-6" aria-busy="true" aria-label="Loading workouts">
+    <div
+      className="flex flex-col gap-6"
+      aria-busy="true"
+      aria-label="Loading workouts"
+    >
       <div className="h-8 w-40 animate-pulse rounded bg-zinc-200 dark:bg-zinc-800" />
       {[0, 1, 2].map((i) => (
         <div

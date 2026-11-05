@@ -30,7 +30,9 @@ export async function createWorkoutAction(
     await createWorkout(user.id, parsed.data);
   } catch (err) {
     if (err instanceof UnknownExerciseError) {
-      return { error: "One of the exercises no longer exists. Reload and try again." };
+      return {
+        error: "One of the exercises no longer exists. Reload and try again.",
+      };
     }
     console.error("createWorkout failed", err);
     return { error: "Couldn't save your workout. Please try again." };
