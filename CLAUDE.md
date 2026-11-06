@@ -58,6 +58,7 @@ Write comments for a teammate who knows React, Next.js, and TypeScript, the way 
   - `src/server/`: data access and auth (`import "server-only"`). Every function takes the user id from `requireUser()`.
   - `src/components/ui/`: shared primitives (`Button`, `Badge`, `ErrorAlert`, `FieldError`, `WarningList`, `Select`, `cardClasses`, `inputClasses`). Reuse them instead of copying class strings.
   - `src/lib/`: framework-agnostic helpers and Zod schemas (`lib/validation/`).
+  - `src/test/`: test helpers (in-memory database, Supabase stub).
 - **Components:** extract a component when a file mixes several concerns or passes ~150 lines. Use `useReducer` (with a pure, tested reducer) for related or nested state.
 - **Server Actions:** treat input as `unknown` and validate with Zod; get the user from `requireUser()`; call `redirect()` outside `try/catch`.
 - **Migrations:** generate with `npm run db:generate`; hand-edit only when needed (e.g. backfills) and explain why in the SQL. Never edit a migration that has been applied.
@@ -67,6 +68,7 @@ Write comments for a teammate who knows React, Next.js, and TypeScript, the way 
 - Write tests alongside the features that need them, especially:
   - the LLM parsing logic (messy inputs, malformed output, empty input, API failure)
   - authorization rules (an athlete cannot read another athlete's data; a coach can only read linked athletes)
+- Code in `src/server/` is tested against a real Postgres (PGlite, in memory) with the real migrations: add `vi.mock("@/db", () => import("@/test/mock-db"))`, import `db` from `@/test/mock-db`, call `resetDb(db)` in `beforeEach`, and create users with `createAuthUser` so the profile trigger runs.
 - Run format, lint, typecheck, and tests before declaring a task done.
 
 ## Commands
