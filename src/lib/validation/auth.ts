@@ -25,11 +25,14 @@ export const signupSchema = z.object({
     .string()
     .min(8, "Use at least 8 characters.")
     .max(72, "Use at most 72 characters."), // bcrypt's input limit
+  role: z.enum(["athlete", "coach"], "Choose athlete or coach."),
 });
 
 // `values` refills fields after a failed submit, since React resets the form.
 export type AuthFormState = {
   error?: string;
-  fieldErrors?: Partial<Record<"name" | "email" | "password", string[]>>;
-  values?: { name?: string; email?: string };
+  fieldErrors?: Partial<
+    Record<"name" | "email" | "password" | "role", string[]>
+  >;
+  values?: { name?: string; email?: string; role?: string };
 };

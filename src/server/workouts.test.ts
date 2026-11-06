@@ -41,6 +41,21 @@ describe("profile trigger", () => {
     });
   });
 
+  it("copies the coach role from signup metadata", async () => {
+    const id = await createAuthUser(db, "coach@example.com", { role: "coach" });
+    const [profile] = await db.select().from(users).where(eq(users.id, id));
+    expect(profile.role).toBe("coach");
+  });
+
+  it.each([
+    ["an unknown role", { role: "admin" }],
+    ["no role", {}],
+  ])("defaults to athlete for %s", async (_label, metadata) => {
+    const id = await createAuthUser(db, "x@example.com", metadata);
+    const [profile] = await db.select().from(users).where(eq(users.id, id));
+    expect(profile.role).toBe("athlete");
+  });
+
   it("falls back to the email's local part for a blank name", async () => {
     const id = await createAuthUser(db, "sam.lee@example.com", {
       name: "  ",

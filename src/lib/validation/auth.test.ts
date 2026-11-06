@@ -37,12 +37,28 @@ describe("signupSchema", () => {
     name: "Adam",
     email: "adam@example.com",
     password: "12345678",
+    role: "athlete",
   };
 
   it("accepts a valid signup and trims the name", () => {
     expect(signupSchema.parse({ ...valid, name: "  Adam  " }).name).toBe(
       "Adam",
     );
+  });
+
+  it.each(["athlete", "coach"])("accepts the %s role", (role) => {
+    expect(signupSchema.safeParse({ ...valid, role }).success).toBe(true);
+  });
+
+  it.each([
+    ["missing", undefined],
+    ["unknown", "admin"],
+  ])("rejects a %s role", (_label, role) => {
+    const result = signupSchema.safeParse({ ...valid, role });
+    if (result.success) throw new Error("expected validation to fail");
+    expect(z.flattenError(result.error).fieldErrors).toEqual({
+      role: ["Choose athlete or coach."],
+    });
   });
 
   it("rejects a blank name", () => {

@@ -51,20 +51,21 @@ export async function signup(
     name: text(formData, "name"),
     email: text(formData, "email"),
     password: text(formData, "password"),
+    role: text(formData, "role"),
   };
-  const values = { name: raw.name, email: raw.email };
+  const values = { name: raw.name, email: raw.email, role: raw.role };
   const parsed = signupSchema.safeParse(raw);
   if (!parsed.success) {
     return { fieldErrors: z.flattenError(parsed.error).fieldErrors, values };
   }
 
-  const { name, email, password } = parsed.data;
+  const { name, email, password, role } = parsed.data;
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
-    // Copied into public.users.name by the on_auth_user_created trigger.
-    options: { data: { name } },
+    // Copied into public.users by the on_auth_user_created trigger.
+    options: { data: { name, role } },
   });
 
   if (error) {

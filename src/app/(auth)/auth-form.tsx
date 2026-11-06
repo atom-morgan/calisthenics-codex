@@ -7,6 +7,7 @@ import { FormField } from "@/components/form-field";
 import { ErrorAlert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import type { AuthFormState } from "@/lib/validation/auth";
+import { RolePicker } from "./role-picker";
 
 type Mode = "login" | "signup";
 
@@ -39,6 +40,12 @@ export function AuthForm({ mode }: { mode: Mode }) {
       <h1 className="text-2xl font-semibold tracking-tight">{copy.title}</h1>
 
       <form action={formAction} className="flex flex-col gap-4" noValidate>
+        {mode === "signup" && (
+          <RolePicker
+            defaultValue={state.values?.role}
+            error={state.fieldErrors?.role?.join(" ")}
+          />
+        )}
         {mode === "signup" && (
           <FormField
             label="Name"

@@ -22,6 +22,13 @@
       "when": 1793841856552,
       "tag": "0002_sets_exercise_position",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1793989972617,
+      "tag": "0003_profile_role",
+      "breakpoints": true
     }
   ]
 }
