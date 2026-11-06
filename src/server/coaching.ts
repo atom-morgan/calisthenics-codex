@@ -1,8 +1,9 @@
 import "server-only";
 
-import { and, asc, eq, sql } from "drizzle-orm";
+import { and, asc, count, eq, max, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { coachAthletes, users } from "@/db/schema";
+import { coachAthletes, users, workouts } from "@/db/schema";
+import { listWorkoutsForUser, type WorkoutSummary } from "./workouts";
 
 /**
  * No coach with that email. Also thrown for non-coach accounts, so the error
@@ -85,4 +86,65 @@ export async function listCoachesForAthlete(
     .innerJoin(users, eq(users.id, coachAthletes.coachId))
     .where(eq(coachAthletes.athleteId, athleteId))
     .orderBy(asc(users.name));
+}
+
+export type AthleteSummary = {
+  id: string;
+  name: string;
+  email: string;
+  workoutCount: number;
+  lastWorkoutOn: string | null; // YYYY-MM-DD
+};
+
+/**
+ * Athletes who have added this coach, with a little activity context.
+ *
+ * `coachId` must come from requireUser(): the join on it is the access rule.
+ */
+export async function listAthletesForCoach(
+  coachId: string,
+): Promise<AthleteSummary[]> {
+  return db
+    .select({
+      id: users.id,
+      name: users.name,
+      email: users.email,
+      workoutCount: count(workouts.id),
+      lastWorkoutOn: max(workouts.performedOn),
+    })
+    .from(coachAthletes)
+    .innerJoin(users, eq(users.id, coachAthletes.athleteId))
+    .leftJoin(workouts, eq(workouts.userId, users.id))
+    .where(eq(coachAthletes.coachId, coachId))
+    .groupBy(users.id)
+    .orderBy(asc(users.name));
+}
+
+/**
+ * An athlete's recent workouts, or null unless that athlete has added this
+ * coach. Null covers "not linked" and "doesn't exist" alike, so callers return
+ * the same 404 for both.
+ *
+ * `coachId` must come from requireUser(); `athleteId` is untrusted input.
+ */
+export async function listAthleteWorkoutsForCoach(
+  coachId: string,
+  athleteId: string,
+): Promise<{
+  athlete: { id: string; name: string };
+  workouts: WorkoutSummary[];
+} | null> {
+  const [athlete] = await db
+    .select({ id: users.id, name: users.name })
+    .from(coachAthletes)
+    .innerJoin(users, eq(users.id, coachAthletes.athleteId))
+    .where(
+      and(
+        eq(coachAthletes.coachId, coachId),
+        eq(coachAthletes.athleteId, athleteId),
+      ),
+    );
+  if (!athlete) return null;
+
+  return { athlete, workouts: await listWorkoutsForUser(athlete.id) };
 }

@@ -167,3 +167,15 @@ Bugs, gotchas, and surprises hit while building this, with the cause, the fix, a
 **Fix:** Separate rules for a count after a single number (one set) and after a list (repeat the list), with examples that use different numbers from the eval cases ([`prompt.ts`](../src/lib/workout-parser/prompt.ts)). Added the reported input and three variations to the eval; 19/19 on two runs.
 
 **Takeaway:** Prompt rules interact like code, so re-run the whole eval after every prompt change, not just the new case. Add every real input that failed to the eval, write prompt examples that differ from the test cases so you're testing the rule rather than memorization, and run more than once because output isn't deterministic.
+
+## Testing
+
+### 18. Denial tests can pass without the rule they're testing
+
+**Problem:** The coach-access tests all passed. Deleting the access rule itself (the `coachId` condition in `listAthleteWorkoutsForCoach`) failed only one of five denial tests.
+
+**Cause:** In most tests the other athlete had no coach at all, so "no link found" was true with or without the `coachId` check. The tests proved "no data means no access", not "the wrong coach is denied".
+
+**Fix:** In the denial tests, the other athlete is linked to a *different* coach, so only the `coachId` condition can deny access ([`coaching.test.ts`](../src/server/coaching.test.ts)). With the rule removed, all three cross-access tests now fail.
+
+**Takeaway:** For every authorization test, set up data where access would succeed if the check were missing, then confirm it by deleting the check and watching the test fail (a manual mutation test). A denial test that passes on an empty database proves nothing.

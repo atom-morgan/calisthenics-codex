@@ -25,6 +25,14 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
               >
                 Workouts
               </Link>
+              {user.role === "coach" && (
+                <Link
+                  href="/athletes"
+                  className="transition-colors hover:text-fg"
+                >
+                  Athletes
+                </Link>
+              )}
               {user.role === "athlete" && (
                 <Link
                   href="/sharing"
