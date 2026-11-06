@@ -14,11 +14,29 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
     <div className="flex min-h-full flex-col">
       <header className="sticky top-0 z-10 border-b border-line bg-page">
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-4 py-3">
-          <Link href="/workouts">
-            <Wordmark />
-          </Link>
+          <div className="flex items-center gap-6">
+            <Link href="/workouts">
+              <Wordmark />
+            </Link>
+            <nav className="flex items-center gap-4 text-sm text-muted">
+              <Link
+                href="/workouts"
+                className="transition-colors hover:text-fg"
+              >
+                Workouts
+              </Link>
+              {user.role === "athlete" && (
+                <Link
+                  href="/sharing"
+                  className="transition-colors hover:text-fg"
+                >
+                  Sharing
+                </Link>
+              )}
+            </nav>
+          </div>
           <div className="flex items-center gap-3 text-sm">
-            <span className="text-muted">{user.name}</span>
+            <span className="hidden text-muted sm:inline">{user.name}</span>
             <form action={logout}>
               <Button type="submit" variant="secondary" size="sm">
                 Log out
