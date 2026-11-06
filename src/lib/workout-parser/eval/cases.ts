@@ -101,6 +101,25 @@ export const EVAL_CASES: EvalCase[] = [
       notes: true,
     },
   },
+  // Ladders and repeated sequences. The first is a real user's entry.
+  {
+    input: "overhead press 3 rounds of 2, 3, 5 ladders",
+    expect: {
+      exercises: [{ name: null, sets: reps(2, 3, 5, 2, 3, 5, 2, 3, 5) }],
+    },
+  },
+  {
+    input: "pullup ladder 1-2-3-4-5",
+    expect: { exercises: [{ name: "Pull-up", sets: reps(1, 2, 3, 4, 5) }] },
+  },
+  {
+    input: "chin ups 2x 1-2-3 ladder",
+    expect: { exercises: [{ name: "Chin-up", sets: reps(1, 2, 3, 1, 2, 3) }] },
+  },
+  {
+    input: "dips 4,6,8 x2",
+    expect: { exercises: [{ name: "Dip", sets: reps(4, 6, 8, 4, 6, 8) }] },
+  },
   {
     input: "asdf qwerty",
     expect: { noExercises: true },

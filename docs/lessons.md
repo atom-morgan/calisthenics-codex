@@ -157,3 +157,13 @@ Bugs, gotchas, and surprises hit while building this, with the cause, the fix, a
 **Fix:** Drop `null` keys before validating ([`parse.ts`](../src/lib/workout-parser/parse.ts)), and use `toStrictEqual` in the test that pins the exact output shape.
 
 **Takeaway:** `toEqual` is lenient about `undefined` properties; use `toStrictEqual` when the exact shape matters. And when a diff prints identical values, the difference is something the printer hides.
+
+### 17. A new prompt rule can break an old one
+
+**Problem:** "overhead press 3 rounds of 2, 3, 5 ladders" logged 3 sets instead of 9, and "3x 2-3-5 ladder" logged none. Reported from real use; the eval had no ladder cases.
+
+**Cause:** The prompt covered `3x8` and `8/8/6` but not repeating a sequence, so the model treated "3 rounds" as commentary, and didn't read hyphenated numbers as sets. The first fix ("`2,3,5 x3` is nine sets") then broke a passing case: "muscle ups x3" came back with no sets, because `x3` now had two meanings.
+
+**Fix:** Separate rules for a count after a single number (one set) and after a list (repeat the list), with examples that use different numbers from the eval cases ([`prompt.ts`](../src/lib/workout-parser/prompt.ts)). Added the reported input and three variations to the eval; 19/19 on two runs.
+
+**Takeaway:** Prompt rules interact like code, so re-run the whole eval after every prompt change, not just the new case. Add every real input that failed to the eval, write prompt examples that differ from the test cases so you're testing the rule rather than memorization, and run more than once because output isn't deterministic.
