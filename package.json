@@ -16,7 +16,8 @@
     "format:check": "prettier --check .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "eval:parser": "tsx --env-file=.env.local src/lib/workout-parser/eval/run.ts"
+    "eval:parser": "tsx --env-file=.env.local src/lib/workout-parser/eval/run.ts",
+    "db:seed:demo": "tsx --conditions=react-server --env-file=.env.local src/db/seed-demo.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.5.0",

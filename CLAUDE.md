@@ -83,7 +83,8 @@ Write comments for a teammate who knows React, Next.js, and TypeScript, the way 
 - `npm run db:generate`: generate a SQL migration from `src/db/schema.ts` (no DB needed)
 - `npm run db:migrate`: apply migrations (uses `MIGRATION_DATABASE_URL`)
 - `npm run db:studio`: browse the database in Drizzle Studio
-- `npm run db:seed`: seed the exercise list (idempotent; demo data comes on Day 4)
+- `npm run db:seed`: seed the exercise list (idempotent)
+- `npm run db:seed:demo`: create the demo coach and three athletes with eight weeks of history (needs `DEMO_PASSWORD`; re-running resets only the demo accounts)
 
 Next.js 16 ships its own docs in `node_modules/next/dist/docs/`; see `AGENTS.md`.
 
