@@ -117,3 +117,45 @@ The user's text is wrapped in `<workout>` tags and the prompt treats it as data.
 **Decision:** Not addressed yet. Parsing requires a logged-in user and input is capped at 1,000 characters, but a user could still call it repeatedly and run up API costs.
 
 **Why deferred:** An in-memory limiter doesn't work across serverless instances; a real one needs shared storage (a Postgres table or a Redis-backed limiter). The per-parse cost is small (decision 13), so this is a hardening task rather than a blocker.
+
+## 16. Dark-only, with semantic color tokens
+
+**Decision:** The app has one dark theme. Colors are tokens defined once in `globals.css` (`page`, `surface`, `elevated`, `fg`, `muted`, `line`, `accent` `#FF9200`, `focus`, `danger`, `warning`) and exposed to Tailwind with `@theme inline`; components use `bg-surface text-muted border-line`, never palette colors or `dark:`. Bordered surfaces are always opaque so the dot-grid background only shows in margins.
+
+**Why:** One consistent look for demos and screenshots, half the visual states to check, and a single place to change a color. New screens (like the coach view) match by default.
+
+**Alternatives:** Light and dark following the system: more flexible, but screenshots depend on the viewer and every screen needs checking twice. A theme toggle: extra state and a flash-of-wrong-theme problem for no demo benefit.
+
+## 17. The role is chosen at signup
+
+**Decision:** Signup asks "athlete or coach". The role travels in Supabase signup metadata, and the profile trigger stores `coach` only for exactly `'coach'`; anything else becomes `athlete` ([`0003_profile_role.sql`](../drizzle/0003_profile_role.sql)).
+
+**Why it's safe:** Metadata is user-controlled, but the role grants nothing by itself. A coach sees no data until an athlete adds them (18), and the trigger can only ever produce the two defined roles.
+
+**Alternatives:** Everyone starts as an athlete and switches on a settings page: one more screen for the same outcome.
+
+## 18. Athletes grant access; coaches can't request it
+
+**Decision:** An athlete adds a coach by email on the Sharing page and can remove them at any time; that link is the only thing that gives a coach read access. `addCoach` checks both roles in the same transaction, and an unknown email and a non-coach email return the same error.
+
+**Why:** The athlete owns the data, so only they can share it. If coaches could add athletes by email, any coach could read anyone's history by knowing their address. The identical error keeps the form from revealing which emails have accounts.
+
+**Later:** A coach-specific invite link that signs an athlete up already linked. Still athlete-initiated, with less typing.
+
+## 19. Denied access is a 404, not a 403
+
+**Decision:** `listAthleteWorkoutsForCoach` returns `null` both when the athlete isn't linked and when the id doesn't exist, and `/athletes/[id]` turns either into `notFound()`. Malformed ids are rejected by Zod before any query.
+
+**Why:** A 403 would confirm that the id belongs to a real athlete. With one response for both cases, guessing ids reveals nothing.
+
+**Alternatives:** 403 for "exists but not yours": more precise for debugging, but it leaks existence, and there's no legitimate user who needs that distinction.
+
+## 20. Data-access tests run on PGlite
+
+**Decision:** Tests for `src/server/` run against PGlite (Postgres compiled to WebAssembly, in memory, in the Vitest process) with the app's real migrations, plus a small stub of Supabase's `auth.users` and API roles ([`src/test/db.ts`](../src/test/db.ts)). Each test file gets its own database.
+
+**Why:** Real SQL, constraints, and the real profile trigger, with no Docker, network, or secrets, so it runs anywhere including CI. The full suite takes about three seconds.
+
+**Alternatives:** The Supabase database: slow, shared with production data, and needs secrets in CI. Docker Postgres: the most faithful, but heavier to run locally and in CI. Mocking Drizzle: fast, but it wouldn't test the SQL, which is where the access rules live.
+
+**Doesn't cover:** Supabase-only behavior (the REST API, RLS as enforced by its roles, Auth itself). That's acceptable because authorization lives in the data layer (3), which these tests exercise directly, including a manual mutation check of the access rule ([lessons.md](lessons.md#18-denial-tests-can-pass-without-the-rule-theyre-testing)).
