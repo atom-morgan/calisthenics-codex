@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { z } from "zod";
+import { ProgressPanel } from "@/components/progress-panel";
 import { Badge } from "@/components/ui/badge";
 import { buttonClasses } from "@/components/ui/button";
 import { cardClasses } from "@/components/ui/card";
@@ -11,6 +12,7 @@ import { listAthleteWorkoutsForCoach } from "@/server/coaching";
 export default async function AthletePage(props: PageProps<"/athletes/[id]">) {
   const user = await requireUser();
   const id = z.uuid().safeParse((await props.params).id);
+  const { exercise } = await props.searchParams;
   if (!id.success) notFound();
 
   // Null unless this athlete added this coach: same 404 as a missing athlete.
@@ -51,6 +53,23 @@ export default async function AthletePage(props: PageProps<"/athletes/[id]">) {
         </div>
       </div>
 
+      {workouts.length > 0 && (
+        <section className="flex flex-col gap-3">
+          <h2 className="text-lg font-semibold tracking-tight">Progress</h2>
+          <ProgressPanel
+            // athlete.id comes from the coach access check above.
+            userId={athlete.id}
+            exerciseId={typeof exercise === "string" ? exercise : undefined}
+            basePath={`/athletes/${athlete.id}`}
+          />
+        </section>
+      )}
+
+      {workouts.length > 0 && (
+        <h2 className="text-lg font-semibold tracking-tight">
+          Recent workouts
+        </h2>
+      )}
       {workouts.length === 0 ? (
         <p
           className={`${cardClasses} border-dashed px-6 py-14 text-center text-sm text-muted`}

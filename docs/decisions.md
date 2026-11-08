@@ -159,3 +159,13 @@ The user's text is wrapped in `<workout>` tags and the prompt treats it as data.
 **Alternatives:** The Supabase database: slow, shared with production data, and needs secrets in CI. Docker Postgres: the most faithful, but heavier to run locally and in CI. Mocking Drizzle: fast, but it wouldn't test the SQL, which is where the access rules live.
 
 **Doesn't cover:** Supabase-only behavior (the REST API, RLS as enforced by its roles, Auth itself). That's acceptable because authorization lives in the data layer (3), which these tests exercise directly, including a manual mutation check of the access rule ([lessons.md](lessons.md#18-denial-tests-can-pass-without-the-rule-theyre-testing)).
+
+## 21. Progress charts one "best set" metric per exercise
+
+**Decision:** `/progress` (and the coach's athlete page) plots the best set per session for one exercise. The metric is picked from how the exercise is logged ([`lib/progress.ts`](../src/lib/progress.ts)): seconds if it's never logged with reps, added weight if every session is weighted, otherwise reps. The selected exercise lives in the URL (`?exercise=`), so the page stays a Server Component that fetches only that exercise, reload and Back keep the selection, and the picker is plain links.
+
+**Why:** One clear line per chart, no configuration, and a sensible default for holds, bodyweight, and weighted work. Weight is only used when every session has it, so bodyweight days don't plot as 0 lb.
+
+**Trade-off:** A weighted exercise shows only weight, which hides rep progress at the same load (5 reps at +25 lb becoming 8 reps at +25 lb is progress the chart can't see).
+
+**Later:** A toggle between the metrics an exercise has, e.g. reps and added weight for weighted pull-ups. `bestSetSeries` would return every applicable metric, and the page would pick one with `?metric=`, the same URL-state pattern as the exercise picker. Keep one metric per chart; two units on one chart would need two y-axes.
