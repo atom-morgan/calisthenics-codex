@@ -1,13 +1,24 @@
+"use client";
+
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 
-/** Body of a route's error.tsx: the message plus a retry button. */
+export type RouteErrorProps = { error: unknown; retry: () => void };
+
+/**
+ * The whole body of a route's error.tsx: logs the error and shows the message
+ * with a retry button. Next needs an error.tsx per segment, so each one only
+ * supplies its message.
+ */
 export function LoadError({
-  message,
+  error,
   retry,
-}: {
-  message: string;
-  retry: () => void;
-}) {
+  message,
+}: RouteErrorProps & { message: string }) {
+  useEffect(() => {
+    console.error(error);
+  }, [error]);
+
   return (
     <div
       role="alert"
