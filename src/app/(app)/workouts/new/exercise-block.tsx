@@ -35,7 +35,7 @@ export function ExerciseBlock({
   return (
     <fieldset className={`${cardClasses} flex flex-col gap-3 p-5`}>
       <legend className="sr-only">Exercise {index + 1}</legend>
-      <div className="flex items-end gap-2">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
         <label className="flex flex-1 flex-col gap-1">
           <span className="text-sm font-medium">Exercise</span>
           <Select
@@ -84,6 +84,8 @@ export function ExerciseBlock({
           <Button
             variant="ghost"
             size="sm"
+            // Phones: right-aligned under the fields. Wider: at the row's end.
+            className="self-end sm:mb-1.5"
             onClick={() => dispatch({ type: "removeExercise", exerciseKey })}
           >
             Remove exercise
@@ -101,8 +103,14 @@ export function ExerciseBlock({
       >
         <span>Set</span>
         <span>Reps</span>
-        <span>Hold (sec)</span>
-        <span>+ Weight (lb)</span>
+        <span>
+          Hold <span className="hidden sm:inline">(sec)</span>
+          <span className="sm:hidden">(s)</span>
+        </span>
+        <span>
+          <span className="hidden sm:inline">+ Weight (lb)</span>
+          <span className="sm:hidden">+ lb</span>
+        </span>
         <span />
       </div>
       {exercise.sets.map((set, setIndex) => {

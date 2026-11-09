@@ -59,7 +59,7 @@ export function DescribeWorkout({ onParsed }: DescribeWorkoutProps) {
           className={`${inputClasses} resize-y font-mono`}
         />
       </label>
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
         <Button
           type="submit"
           size="sm"
