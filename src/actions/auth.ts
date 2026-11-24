@@ -1,5 +1,6 @@
 "use server";
 
+import { isAuthRetryableFetchError } from "@supabase/supabase-js";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
@@ -32,6 +33,15 @@ export async function login(
 
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword(parsed.data);
+  if (isAuthRetryableFetchError(error)) {
+    // Supabase is unreachable (network error or 5xx), e.g. a paused project.
+    // Without this branch an outage reads as a wrong password.
+    console.error("login failed", error.status, error.message);
+    return {
+      error: "Couldn't log in right now. Please try again.",
+      values: { email: raw.email },
+    };
+  }
   if (error) {
     // One message for unknown email and wrong password, to avoid account enumeration.
     return {
