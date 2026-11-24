@@ -17,6 +17,9 @@ const client =
   postgres(connectionString, {
     // Supabase's transaction pooler doesn't support prepared statements.
     prepare: false,
+    // Seconds. The default (30) makes a paused or unreachable database hang
+    // every page for half a minute before the error boundary shows.
+    connect_timeout: 10,
   });
 
 if (process.env.NODE_ENV !== "production") globalForDb.pgClient = client;
