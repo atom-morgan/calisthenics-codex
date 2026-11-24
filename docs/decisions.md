@@ -169,3 +169,13 @@ The user's text is wrapped in `<workout>` tags and the prompt treats it as data.
 **Trade-off:** A weighted exercise shows only weight, which hides rep progress at the same load (5 reps at +25 lb becoming 8 reps at +25 lb is progress the chart can't see).
 
 **Later:** A toggle between the metrics an exercise has, e.g. reps and added weight for weighted pull-ups. `bestSetSeries` would return every applicable metric, and the page would pick one with `?metric=`, the same URL-state pattern as the exercise picker. Keep one metric per chart; two units on one chart would need two y-axes.
+
+## 22. A scheduled ping keeps the free Supabase project awake
+
+**Decision:** A GitHub Actions workflow ([`keep-alive.yml`](../.github/workflows/keep-alive.yml)) calls `/api/health` every three days. The route runs `select 1` and returns 503 if the database is unreachable, so a failed run also works as a basic uptime alert.
+
+**Why:** Supabase pauses free projects after 7 days without database activity, and a portfolio app can go weeks without visitors ([lessons.md](lessons.md#19-a-paused-supabase-project-looked-like-a-slow-site-and-wrong-passwords)). The ping uses CI that already exists and costs nothing.
+
+**Alternatives:** Supabase Pro (about $25/month) never pauses: the right answer once the app has real users. A Vercel Cron Job would also work, but Hobby crons are limited to once a day and run inside the app being monitored, so they couldn't report that it's down.
+
+**Caveats:** `/api/health` is public (it reveals only up or down). GitHub disables scheduled workflows after 60 days without commits, so a long-idle repo needs the workflow re-enabled from the Actions tab.

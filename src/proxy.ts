@@ -5,7 +5,7 @@ import { supabaseEnv } from "@/lib/supabase/env";
 // Refreshes the Supabase session and redirects signed-out users to /login.
 // This is an optimistic check only; authorization happens in src/server/auth.ts.
 
-const PUBLIC_PATHS = ["/", "/login", "/signup"];
+const PUBLIC_PATHS = ["/", "/login", "/signup", "/api/health"];
 
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });

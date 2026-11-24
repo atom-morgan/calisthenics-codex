@@ -179,3 +179,15 @@ Bugs, gotchas, and surprises hit while building this, with the cause, the fix, a
 **Fix:** In the denial tests, the other athlete is linked to a *different* coach, so only the `coachId` condition can deny access ([`coaching.test.ts`](../src/server/coaching.test.ts)). With the rule removed, all three cross-access tests now fail.
 
 **Takeaway:** For every authorization test, set up data where access would succeed if the check were missing, then confirm it by deleting the check and watching the test fail (a manual mutation test). A denial test that passes on an empty database proves nothing.
+
+## Operations
+
+### 19. A paused Supabase project looked like a slow site and wrong passwords
+
+**Problem:** Two weeks after launch the live app was "slow or not working". The landing and login pages loaded instantly, but logging in said "Incorrect email or password." and pages that read data hung.
+
+**Cause:** Supabase pauses free-tier projects after 7 days without database activity. The public pages never touch the database, so Vercel looked healthy. The login action mapped every Supabase error to the wrong-password message, and postgres.js waits 30 seconds by default before giving up on a connection.
+
+**Fix:** Restored the project in the Supabase dashboard. Login now reports an outage as "Couldn't log in right now" and logs it ([`actions/auth.ts`](../src/actions/auth.ts)), the database client times out after 10 seconds ([`db/index.ts`](../src/db/index.ts)), and a scheduled workflow pings a route that runs a query so the project doesn't pause again ([decisions.md](decisions.md#22-a-scheduled-ping-keeps-the-free-supabase-project-awake)).
+
+**Takeaway:** A catch-all error message hides outages, so keep the user-facing message generic but log the real error, and tell "the service is down" apart from "you got it wrong". On free tiers, know each provider's idle rules.
